@@ -6449,7 +6449,7 @@ function getOrCreateViewerId() {
 }
 
 function getInitialLanguage(): Lang {
-  if (typeof window === "undefined") return "zh";
+  if (typeof window === "undefined") return "en";
   try {
     const saved = window.localStorage.getItem(LANG_STORAGE_KEY);
     if (saved === "zh" || saved === "en") return saved;

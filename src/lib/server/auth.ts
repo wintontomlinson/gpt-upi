@@ -157,6 +157,17 @@ export async function getAdminSession() {
   try {
     const verified = await jwtVerify(token, getJwtSecret());
     if (verified.payload.admin !== true) return null;
+
+    // Support both new username/password login and legacy Telegram login
+    const username = verified.payload.username;
+    if (typeof username === "string") {
+      // New direct login flow
+      const adminUsername = process.env.ADMIN_USERNAME || "admin";
+      if (username !== adminUsername) return null;
+      return { telegramUserId: process.env.TELEGRAM_ADMIN_ID || "0", username };
+    }
+
+    // Legacy Telegram login flow (backward compatible)
     const telegramUserId = verified.payload.telegramUserId;
     if (typeof telegramUserId !== "string") return null;
 

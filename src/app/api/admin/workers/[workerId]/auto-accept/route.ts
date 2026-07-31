@@ -31,7 +31,7 @@ export async function POST(request: Request, context: { params: Promise<{ worker
     const enabled = Boolean(body.enabled);
 
     if (enabled) {
-      return fail("管理员只能关闭 worker 自动接单；开启需由 worker 本人上线后操作");
+      return fail("Admin can only disable worker auto-accept. Enabling must be done by the worker themselves when online");
     }
 
     const updated = await prisma.worker.update({
@@ -45,9 +45,9 @@ export async function POST(request: Request, context: { params: Promise<{ worker
 
     return ok(serializeWorker(updated));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
-      return fail("接单账号不存在", 404);
+      return fail("Worker account not found", 404);
     }
     return handleRouteError(error);
   }

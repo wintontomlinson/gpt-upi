@@ -36,7 +36,7 @@ export async function GET(request: Request) {
 
     return ok(paginatedPayload(cdks.map(serializeCdk), { page, pageSize, total, search }));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }
@@ -49,8 +49,8 @@ export async function POST(request: Request) {
     const amount = parseRechargeCdkAmount(body.amount);
     const remark = String(body.remark || "").trim() || null;
 
-    if (!code) return fail("请输入 CDK");
-    if (!amount) return fail("请选择有效充值金额：1.8U、5U 或 10U");
+    if (!code) return fail("CDK code is required");
+    if (!amount) return fail("Please select a valid amount: 1.8U, 5U, or 10U");
 
     const cdk = await prisma.cdk.create({
       data: {
@@ -63,9 +63,9 @@ export async function POST(request: Request) {
 
     return ok(serializeCdk(cdk));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
-    const message = error instanceof Error ? error.message : "创建 CDK 失败";
-    if (message.includes("Unique") || message.includes("P2002")) return fail("CDK 已存在");
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
+    const message = error instanceof Error ? error.message : "Failed to create CDK";
+    if (message.includes("Unique") || message.includes("P2002")) return fail("CDK already exists");
     return handleRouteError(error);
   }
 }

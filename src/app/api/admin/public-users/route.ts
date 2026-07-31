@@ -328,7 +328,7 @@ export async function GET(request: Request) {
           user.id,
           user.premiumSource,
           user.premiumTier,
-          user.depositRiskSigned ? "已签署" : "未签署",
+          user.depositRiskSigned ? "signed" : "unsigned",
           user.depositRiskSigned ? "signed" : "unsigned",
         ].some((value) => String(value || "").toLowerCase().includes(normalizedSearch));
       })
@@ -348,7 +348,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }

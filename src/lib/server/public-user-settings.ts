@@ -131,7 +131,7 @@ function telegramExtractionReason(error?: string | null) {
     lower.includes("session token") && lower.includes("invalid") ||
     lower.includes("session cookie") && lower.includes("invalid") ||
     lower.includes("session json") && lower.includes("invalid") ||
-    text.includes("没有识别到有效的 session token")
+    text.includes("no valid session token recognized")
   ) {
     return "No valid session token / session cookie / session JSON was recognized.";
   }

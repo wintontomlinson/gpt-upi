@@ -59,9 +59,9 @@ function isTransientSubscriptionCheckError(message: string) {
 export function normalizeSubscriptionCheckError(error: unknown) {
   const raw = compactThrownError(error);
   if (isTransientSubscriptionCheckError(raw)) {
-    return "订阅检测服务暂时异常，系统会在等待期内自动重试。 / Subscription check service returned a temporary error; retrying automatically during the check window.";
+    return "Subscription check service returned a temporary error; retrying automatically during the check window.";
   }
-  return raw || "订阅状态检测失败 / Subscription check failed";
+  return raw || "Subscription check failed";
 }
 
 export async function runWorkerSubscriptionCheck(input: {
@@ -81,7 +81,7 @@ export async function runWorkerSubscriptionCheck(input: {
       verified: true,
       canRetry: false,
       attempts: 0,
-      message: "订单此前已完成 / The order was already completed.",
+      message: "The order was already completed.",
     };
   }
 
@@ -111,7 +111,7 @@ export async function runWorkerSubscriptionCheck(input: {
             canRetry: false,
             planType: result.planType,
             attempts: attempt,
-            message: "已检测到账号订阅更新为 Plus，订单已完成 / Plus detected. The order has been completed.",
+            message: "Plus detected. The order has been completed.",
           };
         }
       } catch (error) {
@@ -120,8 +120,8 @@ export async function runWorkerSubscriptionCheck(input: {
     }
 
     const message = lastError
-      ? `订阅状态检测失败：${lastError}`
-      : `暂未检测到 Plus，当前检测到的订阅等级为 ${lastPlan || "unknown"}。系统会在等待期内继续自动检测。`;
+      ? `Subscription check failed: ${lastError}`
+      : `Plus not detected yet. Current subscription plan: ${lastPlan || "unknown"}. The system will continue checking automatically during the check window.`;
     const failed = await failSubscriptionCheck({
       orderId: input.orderId,
       workerId: input.workerId,
@@ -138,11 +138,11 @@ export async function runWorkerSubscriptionCheck(input: {
       planType: lastPlan || "unknown",
       attempts,
       message: failed.canRetry
-        ? "暂未检测到 Plus；如果订单仍在检查窗口内，系统会继续自动检测。 / Plus not detected yet; auto-check will continue while the order is still in the check window."
-        : "暂未检测到 Plus，请重新生成二维码或报告订单问题。 / Plus not detected. Please regenerate the QR code or report the order issue.",
+        ? "Plus not detected yet; auto-check will continue while the order is still in the check window."
+        : "Plus not detected. Please regenerate the QR code or report the order issue.",
     };
   } catch (error) {
-    const message = `订阅状态检测失败：${normalizeSubscriptionCheckError(error)}`;
+    const message = `Subscription check failed: ${normalizeSubscriptionCheckError(error)}`;
     try {
       const failed = await failSubscriptionCheck({
         orderId: input.orderId,

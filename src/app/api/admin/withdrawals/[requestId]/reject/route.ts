@@ -15,8 +15,8 @@ export async function POST(request: Request, context: { params: Promise<{ reques
       where: { id: requestId },
       select: { id: true, status: true },
     });
-    if (!current) return fail("提现申请不存在", 404);
-    if (current.status !== "PENDING") return fail("该提现申请已处理");
+    if (!current) return fail("Withdrawal request not found", 404);
+    if (current.status !== "PENDING") return fail("This withdrawal request has already been processed");
 
     const withdrawal = await prisma.workerWithdrawalRequest.update({
       where: { id: requestId },
@@ -32,8 +32,8 @@ export async function POST(request: Request, context: { params: Promise<{ reques
     });
     return ok(serializeWorkerWithdrawalRequest(withdrawal));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
-    if (error && typeof error === "object" && "code" in error && error.code === "P2025") return fail("提现申请不存在", 404);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") return fail("Withdrawal request not found", 404);
     return handleRouteError(error);
   }
 }

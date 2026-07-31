@@ -20,7 +20,7 @@ export async function GET() {
     await requireAdminSession();
     return ok(await getPublicSiteSettings());
   } catch (error) {
-    if (error instanceof Response) return fail("未授权", 401);
+    if (error instanceof Response) return fail("Unauthorized", 401);
     return handleRouteError(error);
   }
 }
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
 
     return ok(await getPublicSiteSettings());
   } catch (error) {
-    if (error instanceof Response) return fail("未授权", 401);
+    if (error instanceof Response) return fail("Unauthorized", 401);
     if (error instanceof Error && error.message.includes("Premium")) return fail(error.message, 400);
     return handleRouteError(error);
   }

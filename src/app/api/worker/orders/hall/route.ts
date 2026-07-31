@@ -10,8 +10,8 @@ export async function GET() {
   try {
     const worker = await requireWorkerSession();
     const current = await prisma.worker.findUnique({ where: { id: worker.id } });
-    if (!current) return fail("接单方不存在", 404);
-    if (current.status !== "ONLINE") return ok({ orders: [], gated: true, message: "上线后才能查看订单大厅" });
+    if (!current) return fail("Worker not found", 404);
+    if (current.status !== "ONLINE") return ok({ orders: [], gated: true, message: "Go online to view the order hall" });
 
     await expireStaleOrders();
 
@@ -23,7 +23,7 @@ export async function GET() {
     });
     return ok({ orders: orders.map(serializeWorkerOrder), gated: false });
   } catch (error) {
-    if (error instanceof Response) return fail("未登录", 401);
+    if (error instanceof Response) return fail("Unauthorized", 401);
     return handleRouteError(error);
   }
 }

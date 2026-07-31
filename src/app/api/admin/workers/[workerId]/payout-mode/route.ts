@@ -34,8 +34,8 @@ export async function POST(request: Request, context: { params: Promise<{ worker
     });
     return ok(serializeWorker(updated));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
-    if (error && typeof error === "object" && "code" in error && error.code === "P2025") return fail("接单账号不存在", 404);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") return fail("Worker account not found", 404);
     return handleRouteError(error);
   }
 }

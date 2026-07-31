@@ -12,17 +12,17 @@ export async function POST(request: Request, context: { params: Promise<{ worker
     const body = await request.json().catch(() => ({}));
     const amount = parseMoneyAmount(body.amount);
     const note = String(body.note || "").trim();
-    if (!amount) return fail("请输入正确的预支金额");
+    if (!amount) return fail("Please enter a valid advance amount");
 
     const worker = await prisma.worker.findUnique({ where: { id: workerId }, select: { id: true } });
-    if (!worker) return fail("接单账号不存在", 404);
+    if (!worker) return fail("Worker account not found", 404);
 
     await prisma.workerWalletLedger.create({
       data: {
         workerId,
         type: "ADMIN_ADVANCE",
         amount: (-Number(amount)).toFixed(2),
-        note: note || "管理员预支款",
+        note: note || "Admin advance payment",
         createdBy: admin.username,
       },
     });
@@ -30,7 +30,7 @@ export async function POST(request: Request, context: { params: Promise<{ worker
 
     return ok(await getWorkerWalletSummary(workerId));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }

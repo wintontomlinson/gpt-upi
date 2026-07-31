@@ -31,7 +31,7 @@ export async function POST() {
     });
     return ok(serializeWorker(updated));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录", 401);
+    if (error instanceof Response) return fail("Unauthorized", 401);
     return handleRouteError(error);
   }
 }

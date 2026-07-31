@@ -474,22 +474,22 @@ export async function redeemRechargeCdk(
   input: { code: unknown }
 ): Promise<PublicUserCdkRedeemResult> {
   const code = normalizeCdkCode(String(input.code || ""));
-  if (!code) throw new Error("请输入 CDK。");
+  if (!code) throw new Error("CDK code is required.");
 
   return prisma.$transaction(
     async (tx) => {
       await getOrCreatePublicUserWallet(user, tx);
       const wallet = await lockWallet(tx, user.telegramUserId);
-      if (!wallet) throw new Error("用户钱包不存在，请重新登录后再试。");
+      if (!wallet) throw new Error("User wallet not found. Please login again.");
 
       const cdk = await lockRechargeCdk(tx, code);
-      if (!cdk) throw new Error("CDK 不存在。");
-      if (cdk.status !== "ACTIVE") throw new Error("CDK 已停用或不可用。");
-      if (cdk.expiresAt && cdk.expiresAt.getTime() <= Date.now()) throw new Error("CDK 已过期。");
-      if (cdk.redeemedAt || cdk.usedCount > 0) throw new Error("CDK 已被兑换。");
+      if (!cdk) throw new Error("CDK does not exist.");
+      if (cdk.status !== "ACTIVE") throw new Error("CDK is deactivated or unavailable.");
+      if (cdk.expiresAt && cdk.expiresAt.getTime() <= Date.now()) throw new Error("CDK has expired.");
+      if (cdk.redeemedAt || cdk.usedCount > 0) throw new Error("CDK has already been redeemed.");
 
       const amount = decimal(cdk.amount);
-      if (amount.lte(0)) throw new Error("该 CDK 没有配置充值金额，请联系管理员。");
+      if (amount.lte(0)) throw new Error("This CDK has no configured recharge amount. Please contact admin.");
 
       await tx.cdk.update({
         where: { id: cdk.id },
@@ -727,19 +727,19 @@ export async function createPublicUserWithdrawalRequest(
   const totalFrozen = amount.add(fee);
   const withdrawalAddress = String(input.withdrawalAddress || "").trim();
 
-  if (amount.lte(0)) throw new Error("\u8bf7\u8f93\u5165\u6b63\u786e\u7684\u63d0\u73b0\u91d1\u989d\u3002");
+  if (amount.lte(0)) throw new Error("Please enter a valid withdrawal amount.");
   if (amount.lt(PUBLIC_USER_MIN_WITHDRAWAL_AMOUNT)) {
-    throw new Error(`最低提现金额为 ${PUBLIC_USER_MIN_WITHDRAWAL_AMOUNT.toFixed(2)} USDT。`);
+    throw new Error(`Minimum withdrawal amount is ${PUBLIC_USER_MIN_WITHDRAWAL_AMOUNT.toFixed(2)} USDT.`);
   }
-  if (!isAddress(withdrawalAddress)) throw new Error("\u8bf7\u8f93\u5165\u6b63\u786e\u7684 BEP20 / BSC \u63d0\u73b0\u5730\u5740\u3002");
+  if (!isAddress(withdrawalAddress)) throw new Error("Please enter a valid BEP20 / BSC withdrawal address.");
 
   const withdrawal = await prisma.$transaction(
     async (tx) => {
       await getOrCreatePublicUserWallet(user, tx);
       const wallet = await lockWallet(tx, user.telegramUserId);
-      if (!wallet) throw new Error("\u7528\u6237\u94b1\u5305\u4e0d\u5b58\u5728\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55\u540e\u518d\u8bd5\u3002");
+      if (!wallet) throw new Error("User wallet not found. Please login again.");
       if (wallet.availableBalance.lessThan(totalFrozen)) {
-        throw new Error(`\u4f59\u989d\u4e0d\u8db3\uff0c\u63d0\u73b0\u91d1\u989d\u548c\u624b\u7eed\u8d39\u5408\u8ba1\u9700\u8981 ${totalFrozen.toFixed(2)} USDT\u3002`);
+        throw new Error(`Insufficient balance. Withdrawal amount and fee total ${totalFrozen.toFixed(2)} USDT.`);
       }
 
       const withdrawal = await tx.publicUserWithdrawalRequest.create({
@@ -812,7 +812,7 @@ export async function purchasePublicUserLifetimePremium(user: PublicUserIdentity
     async (tx) => {
       await getOrCreatePublicUserWallet(user, tx);
       const wallet = await lockWallet(tx, user.telegramUserId);
-      if (!wallet) throw new Error("用户钱包不存在，请重新登录后再试。");
+      if (!wallet) throw new Error("User wallet not found. Please login again.");
       await tx.systemSetting.upsert({
         where: { key: premiumKey },
         update: {},
@@ -829,7 +829,7 @@ export async function purchasePublicUserLifetimePremium(user: PublicUserIdentity
         throw new Error("Premium is already lifetime for this account.");
       }
       if (wallet.availableBalance.lessThan(amount)) {
-        throw new Error(`余额不足，购买长期 Premium 需要 ${formatCompactUsdt(premiumPurchase.purchasePrice)}。`);
+        throw new Error(`Insufficient balance. Purchasing lifetime Premium requires ${formatCompactUsdt(premiumPurchase.purchasePrice)}.`);
       }
 
       await tx.publicUserWallet.update({

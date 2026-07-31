@@ -1915,7 +1915,7 @@ export async function stopAllPublicUpiExtractJobs() {
   return { changed };
 }
 
-export async function failAllPublicUpiExtractJobs(reason = "管理员已停止提取任务") {
+export async function failAllPublicUpiExtractJobs(reason = "Admin stopped extraction tasks") {
   let changed = 0;
   for (const job of Array.from(store.jobs.values())) {
     if (job.status !== "queued" && job.status !== "running") continue;
@@ -3898,13 +3898,11 @@ function isNonRetryableExtractionError(error: unknown, message?: string) {
     includesAll("billing", "cannot be changed") ||
     includesAll("billing address", "locked") ||
     includesAll("openai", "locked") ||
-    text.includes("地区已被 openai 锁定") ||
-    text.includes("无法更改账单地址") ||
-    includesAll("地区", "锁定") ||
-    includesAll("账单", "无法", "更改") ||
-    includesAll("账单", "不能", "更改") ||
-    text.includes("鍦板尯宸茶 openai 閿佸畾") ||
-    text.includes("鏃犳硶鏇存敼璐﹀崟鍦板潃") ||
+    text.includes("region locked by openai") ||
+    text.includes("cannot change billing address") ||
+    includesAll("region", "locked") ||
+    includesAll("billing", "cannot", "change") ||
+    includesAll("billing", "cannot", "change") ||
     text.includes("token_invalidated") ||
     text.includes("token invalidated") ||
     text.includes("invalidated oauth token") ||
@@ -3964,10 +3962,10 @@ function userFacingExtractionError(message: string) {
     lower.includes("country locked") ||
     lower.includes("billing country locked") ||
     (lower.includes("billing") && (lower.includes("cannot change") || lower.includes("cannot be changed") || lower.includes("locked"))) ||
-    lower.includes("地区已被 openai 锁定") ||
-    lower.includes("无法更改账单地址") ||
-    (lower.includes("地区") && lower.includes("锁定")) ||
-    (lower.includes("账单") && (lower.includes("无法") || lower.includes("不能")) && lower.includes("更改"))
+    lower.includes("region locked by openai") ||
+    lower.includes("cannot change billing address") ||
+    (lower.includes("region") && lower.includes("locked")) ||
+    (lower.includes("billing") && (lower.includes("cannot") || lower.includes("unable")) && lower.includes("change"))
   ) {
     return "This account's region is locked by OpenAI, so the billing country cannot be changed.";
   }

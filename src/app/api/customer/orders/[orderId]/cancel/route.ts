@@ -17,7 +17,7 @@ export async function POST(request: Request, context: { params: Promise<{ orderI
   } catch (error) {
     if (error instanceof Response && error.status === 403) return fail("You do not have access to this order", 403);
     const message = error instanceof Error ? error.message : "Cancel order failed";
-    if (message.includes("订单") || message.toLowerCase().includes("order")) return fail(message);
+    if (message.includes("order") || message.toLowerCase().includes("order")) return fail(message);
     return handleRouteError(error);
   }
 }

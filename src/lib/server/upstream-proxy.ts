@@ -164,7 +164,7 @@ function getProxySourcePairs(pool: UpstreamProxyPool): Array<[UpstreamProxyEntry
     ["PREMIUM_UPSTREAM_PROXY", process.env.PREMIUM_UPSTREAM_PROXY || ""],
   ];
 
-  // Premium 先保留独立代理池入口；未单独配置时临时复用公共池。
+  // Premium keeps its own proxy pool if configured; otherwise falls back to the public pool.
   return premiumPairs.some(([, value]) => splitProxyList(value).length > 0) ? premiumPairs : publicPairs;
 }
 
@@ -219,7 +219,7 @@ function normalizeProxyUrlsFromInput(input: string | string[]) {
   const urls: string[] = [];
   for (const raw of rawUrls) {
     const parsed = parseProxyUrl(raw, urls.length, "ADMIN_PUBLIC_PROXY_LIST");
-    if (!parsed) throw new Error(`代理地址格式错误：${redactProxyUrl(raw)}`);
+    if (!parsed) throw new Error(`Invalid proxy URL format: ${redactProxyUrl(raw)}`);
     if (seen.has(parsed.url)) continue;
     seen.add(parsed.url);
     urls.push(parsed.url);
@@ -246,7 +246,7 @@ export async function addEditableUpstreamProxy(pool: UpstreamProxyPool, proxyUrl
 export async function deleteEditableUpstreamProxy(pool: UpstreamProxyPool, proxyId: string) {
   const entries = await getConfiguredUpstreamProxies(pool);
   const target = entries.find((entry) => entry.id === proxyId);
-  if (!target) throw new Error("代理不存在或已被删除");
+  if (!target) throw new Error("Proxy not found or has been deleted");
   const urls = entries.filter((entry) => entry.id !== proxyId).map((entry) => entry.url);
   return setEditableUpstreamProxyUrls(pool, urls);
 }
@@ -288,7 +288,7 @@ export async function setUpstreamProxySelection(selectedProxyId: string, pool: U
   const proxies = await getConfiguredUpstreamProxies(pool);
   const normalized = selectedProxyId === AUTO_PROXY_SELECTION || !selectedProxyId ? AUTO_PROXY_SELECTION : selectedProxyId;
   if (normalized !== AUTO_PROXY_SELECTION && !proxies.some((proxy) => proxy.id === normalized)) {
-    throw new Error("代理不存在或已不在当前代理列表中");
+    throw new Error("Proxy not found or is no longer in the current proxy list");
   }
 
   await prisma.systemSetting.upsert({
@@ -344,7 +344,7 @@ async function fetchWithProbeTimeout(url: string, init: RequestInit, proxyUrl: s
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeout = setTimeout(() => {
       controller.abort();
-      reject(new Error(`${label} 超时 ${Math.ceil(timeoutMs / 1000)} 秒`));
+      reject(new Error(`${label} timed out after ${Math.ceil(timeoutMs / 1000)} seconds`));
     }, timeoutMs);
   });
 
@@ -472,7 +472,7 @@ async function probeProxyExitInfo(proxyUrl: string, timeoutMs: number) {
         },
         proxyUrl,
         timeoutMs,
-        `出口检测 ${probe.label}`
+        `proxy check ${probe.label}`
       );
       const text = await response.text();
       if (!response.ok) throw new Error(`HTTP ${response.status}: ${text.slice(0, 120)}`);
@@ -484,7 +484,7 @@ async function probeProxyExitInfo(proxyUrl: string, timeoutMs: number) {
       failures.push(`${probe.label}: ${compactError(error)}`);
     }
   }
-  throw new Error(failures.join(" | ") || "出口检测失败");
+  throw new Error(failures.join(" | ") || "Proxy check failed");
 }
 
 export async function checkUpstreamProxy(entry: UpstreamProxyEntry, options?: { timeoutMs?: number; expectedCountry?: string }): Promise<UpstreamProxyCheckResult> {
@@ -521,7 +521,7 @@ export async function checkUpstreamProxy(entry: UpstreamProxyEntry, options?: { 
         org = exit.info.org;
         asn = exit.info.asn;
         if (exit.failures.length > 0) {
-          warnings.push(...exit.failures.map((item) => `出口检测备用源: ${item}`));
+          warnings.push(...exit.failures.map((item) => `proxy check fallback source: ${item}`));
         }
       } catch (checkError) {
         error = compactError(checkError);
@@ -551,7 +551,7 @@ export async function checkUpstreamProxy(entry: UpstreamProxyEntry, options?: { 
   ]);
 
   if (expectedCountry && countryCode && countryCode !== expectedCountry) {
-    warnings.push(`出口国家为 ${countryCode}，不是预期的 ${expectedCountry}`);
+    warnings.push(`Exit country is ${countryCode}, expected ${expectedCountry}`);
   }
 
   const chatgptReachable = typeof chatgptStatus === "number" && chatgptStatus < 500;

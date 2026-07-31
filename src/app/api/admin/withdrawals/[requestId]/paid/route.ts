@@ -56,12 +56,12 @@ export async function POST(request: Request, context: { params: Promise<{ reques
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     );
 
-    if (result.type === "notFound") return fail("提现申请不存在", 404);
-    if (result.type === "notPending") return fail("该提现申请已处理");
-    if (result.type === "insufficient") return fail("worker 可用余额不足，不能标记付款");
+    if (result.type === "notFound") return fail("Withdrawal request not found", 404);
+    if (result.type === "notPending") return fail("This withdrawal request has already been processed");
+    if (result.type === "insufficient") return fail("Worker available balance insufficient, cannot mark as paid");
     return ok(serializeWorkerWithdrawalRequest(result.withdrawal));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }

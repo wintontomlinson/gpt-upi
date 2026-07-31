@@ -53,7 +53,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const body = await readBody(request);
   const sessionId = normalizeSessionId(body.sessionId);
-  if (!sessionId) return fail("页面在线统计会话无效", 400);
+  if (!sessionId) return fail("Page presence session invalid", 400);
 
   if (body.leave === true) {
     presenceStore.delete(sessionId);

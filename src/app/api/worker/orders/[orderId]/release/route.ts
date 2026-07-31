@@ -12,9 +12,9 @@ export async function POST(_request: Request, context: { params: Promise<{ order
     const order = await releaseAssignedOrder({ orderId, workerId: worker.id });
     return ok(serializeWorkerOrder(order));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录", 401);
-    const message = error instanceof Error ? error.message : "释放订单失败";
-    if (message.includes("订单") || message.includes("自己") || message.includes("释放") || message.includes("检测")) return fail(message);
+    if (error instanceof Response) return fail("Unauthorized", 401);
+    const message = error instanceof Error ? error.message : "Failed to release order";
+    if (message.includes("order") || message.includes("self") || message.includes("release") || message.includes("check")) return fail(message);
     return handleRouteError(error);
   }
 }

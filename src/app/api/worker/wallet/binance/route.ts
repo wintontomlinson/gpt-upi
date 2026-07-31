@@ -8,11 +8,11 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     const worker = await requireWorkerSession();
-    if (worker.binanceUserId) return fail("Binance 用户 ID 已绑定，绑定后不可修改");
+    if (worker.binanceUserId) return fail("Binance user ID is already bound and cannot be changed");
     const body = await request.json().catch(() => ({}));
     const binanceUserId = String(body.binanceUserId || "").trim();
-    if (!binanceUserId) return fail("请填写 Binance 用户 ID");
-    if (!/^[A-Za-z0-9_.-]{3,64}$/.test(binanceUserId)) return fail("Binance 用户 ID 格式不正确");
+    if (!binanceUserId) return fail("Please enter Binance user ID");
+    if (!/^[A-Za-z0-9_.-]{3,64}$/.test(binanceUserId)) return fail("Binance user ID format is invalid");
 
     const updated = await prisma.worker.update({
       where: { id: worker.id },

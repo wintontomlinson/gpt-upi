@@ -268,7 +268,7 @@ export async function GET(request: Request) {
       pagination: isPaged ? paginatedPayload([], { page, pageSize, total: selectedTotal, search }).pagination : undefined,
     });
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }

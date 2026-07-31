@@ -11,57 +11,33 @@ const SEARCHABLE_RESULTS: OrderResult[] = ["COMPLETED", "PROBLEM", "FAILED", "CA
 const SEARCHABLE_ORDER_STATUSES: OrderStatus[] = ["PENDING", "ASSIGNED", "CHECKING", "NEED_REUPLOAD", "COMPLETED", "FAILED", "CANCELLED", "EXPIRED"];
 
 const RESULT_ALIASES: Record<string, OrderResult> = {
-  完成: "COMPLETED",
-  已完成: "COMPLETED",
   completed: "COMPLETED",
   issue: "PROBLEM",
   problem: "PROBLEM",
-  异常: "PROBLEM",
-  异常重传: "PROBLEM",
-  问题: "PROBLEM",
   failed: "FAILED",
   fail: "FAILED",
-  失败: "FAILED",
   cancelled: "CANCELLED",
   canceled: "CANCELLED",
   cancel: "CANCELLED",
-  取消: "CANCELLED",
-  已取消: "CANCELLED",
   expired: "EXPIRED",
   timeout: "EXPIRED",
-  超时: "EXPIRED",
-  过期: "EXPIRED",
 };
 
 const ORDER_STATUS_ALIASES: Record<string, OrderStatus> = {
   pending: "PENDING",
-  等待: "PENDING",
-  等待接单: "PENDING",
   assigned: "ASSIGNED",
-  处理中: "ASSIGNED",
-  已接单: "ASSIGNED",
   checking: "CHECKING",
-  检测: "CHECKING",
-  正在检测: "CHECKING",
   need_reupload: "NEED_REUPLOAD",
   reupload: "NEED_REUPLOAD",
-  重传: "NEED_REUPLOAD",
   completed: "COMPLETED",
-  完成: "COMPLETED",
-  已完成: "COMPLETED",
   failed: "FAILED",
-  失败: "FAILED",
   cancelled: "CANCELLED",
   canceled: "CANCELLED",
-  取消: "CANCELLED",
-  已取消: "CANCELLED",
   expired: "EXPIRED",
-  超时: "EXPIRED",
-  过期: "EXPIRED",
 };
 
-const SETTLED_SEARCH_KEYS = new Set(["settled", "paid", "已结", "已结单"]);
-const UNSETTLED_SEARCH_KEYS = new Set(["unsettled", "unpaid", "未结", "未结单"]);
+const SETTLED_SEARCH_KEYS = new Set(["settled", "paid"]);
+const UNSETTLED_SEARCH_KEYS = new Set(["unsettled", "unpaid"]);
 
 function normalizeSearchKey(search: string) {
   return search.trim().toLowerCase().replace(/[\s-]+/g, "_");
@@ -151,7 +127,7 @@ export async function GET(request: Request) {
 
     return ok({ items: records.map(serializeRecord), pagination });
   } catch (error) {
-    if (error instanceof Response) return fail("未登录", 401);
+    if (error instanceof Response) return fail("Unauthorized", 401);
     return handleRouteError(error);
   }
 }

@@ -87,7 +87,7 @@ export async function disableActiveUpiGuards() {
     data: {
       status: UpiGuardStatus.CANCELLED,
       purgedAt: new Date(),
-      lastError: "暂存功能已下线",
+      lastError: "Guard feature has been discontinued",
     },
   });
 }
@@ -128,14 +128,14 @@ export async function createUpiGuardTask(input: {
     }
   }
 
-  throw new UpiGuardError("生成暂存 ID 失败，请重试。", 500);
+  throw new UpiGuardError("Failed to generate guard ID. Please retry.", 500);
 }
 
 export async function claimUpiGuardCredential(value: unknown) {
   await purgeExpiredUpiGuards();
 
   const guardId = normalizeGuardId(value);
-  if (!guardId) throw new UpiGuardError("暂存 ID 格式不正确。", 400);
+  if (!guardId) throw new UpiGuardError("Invalid guard ID format.", 400);
 
   const task = await prisma.upiGuardTask.findUnique({
     where: { guardId },
@@ -148,12 +148,12 @@ export async function claimUpiGuardCredential(value: unknown) {
     },
   });
 
-  if (!task) throw new UpiGuardError("暂存 ID 不存在。", 404);
+  if (!task) throw new UpiGuardError("Guard ID does not exist.", 404);
 
   if (task.status !== UpiGuardStatus.ACTIVE) {
     const message = task.status === UpiGuardStatus.COMPLETED
-      ? "这个暂存已完成并清除，不能继续使用。"
-      : "这个暂存已失效，不能继续使用。";
+      ? "This guard has been completed and cleared. It can no longer be used."
+      : "This guard has expired and can no longer be used.";
     throw new UpiGuardError(message, 410);
   }
 
@@ -168,7 +168,7 @@ export async function claimUpiGuardCredential(value: unknown) {
         lastError: "Expired when claimed.",
       },
     });
-    throw new UpiGuardError("这个暂存已过期，不能继续使用。", 410);
+    throw new UpiGuardError("This guard has expired and can no longer be used.", 410);
   }
 
   let credential = "";
@@ -184,7 +184,7 @@ export async function claimUpiGuardCredential(value: unknown) {
         lastError: "Stored credential cannot be decrypted.",
       },
     });
-    throw new UpiGuardError("暂存数据无法读取，请重新创建暂存。", 410);
+    throw new UpiGuardError("Guard data cannot be read. Please create a new guard.", 410);
   }
 
   await prisma.upiGuardTask.update({
@@ -218,7 +218,7 @@ export async function completeUpiGuardTask(value: unknown) {
   await purgeExpiredUpiGuards();
 
   const guardId = normalizeGuardId(value);
-  if (!guardId) throw new UpiGuardError("暂存 ID 格式不正确。", 400);
+  if (!guardId) throw new UpiGuardError("Invalid guard ID format.", 400);
 
   const task = await prisma.upiGuardTask.findUnique({
     where: { guardId },
@@ -232,7 +232,7 @@ export async function completeUpiGuardTask(value: unknown) {
       lastUsedAt: true,
     },
   });
-  if (!task) throw new UpiGuardError("暂存 ID 不存在。", 404);
+  if (!task) throw new UpiGuardError("Guard ID does not exist.", 404);
 
   const now = new Date();
   const next = await prisma.upiGuardTask.update({

@@ -74,8 +74,8 @@ export async function POST(request: Request) {
       message.includes("Premium") ||
       message.includes("Free Premium trial") ||
       message.includes("sale") ||
-      message.includes("余额不足") ||
-      message.includes("用户钱包")
+      message.includes("Insufficient balance") ||
+      message.includes("user wallet")
     ) {
       return fail(message, 400);
     }

@@ -170,7 +170,7 @@ export async function DELETE() {
 export async function PATCH(request: Request) {
   try {
     const user = await getPublicUserSession();
-    if (!user) return fail("请先登录 Telegram 账户。", 401);
+    if (!user) return fail("Please login first.", 401);
 
     const body = (await request.json().catch(() => ({}))) as {
       successTgNotifyEnabled?: boolean;

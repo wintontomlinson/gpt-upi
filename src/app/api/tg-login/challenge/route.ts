@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const purpose = parseLoginPurpose(body.purpose);
-    if (!purpose) return fail("登录类型无效");
+    if (!purpose) return fail("Invalid login type");
 
     const challenge = await createTelegramLoginChallenge(purpose);
     return ok(challenge);

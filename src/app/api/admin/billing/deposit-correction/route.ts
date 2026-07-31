@@ -27,20 +27,20 @@ function decimal(value: unknown) {
 
 function normalizeTxHash(value: unknown) {
   const txHash = String(value || "").trim();
-  if (!/^0x[a-fA-F0-9]{64}$/.test(txHash)) throw new CorrectionError("请输入有效的交易哈希");
+  if (!/^0x[a-fA-F0-9]{64}$/.test(txHash)) throw new CorrectionError("Please enter a valid transaction hash");
   return txHash;
 }
 
 function normalizeLogIndex(value: unknown) {
   if (value === undefined || value === null || String(value).trim() === "") return null;
   const index = Number(value);
-  if (!Number.isInteger(index) || index < 0) throw new CorrectionError("logIndex 必须是非负整数");
+  if (!Number.isInteger(index) || index < 0) throw new CorrectionError("logIndex must be a non-negative integer");
   return index;
 }
 
 function normalizeTarget(value: unknown) {
   const target = String(value || "").trim().replace(/^@+/, "");
-  if (!target) throw new CorrectionError("请输入正确入账用户的 Telegram ID 或用户名");
+  if (!target) throw new CorrectionError("Please enter the correct target user's Telegram ID or username");
   return target;
 }
 
@@ -57,8 +57,8 @@ async function findChainDeposit(db: DbLike, txHash: string, logIndex: number | n
     },
     orderBy: { logIndex: "asc" },
   });
-  if (rows.length === 0) throw new CorrectionError("没有找到这笔链上入账记录，请确认交易已被系统扫描到。", 404);
-  if (rows.length > 1) throw new CorrectionError("该交易包含多条入账日志，请填写 logIndex 后再预览。", 400);
+  if (rows.length === 0) throw new CorrectionError("On-chain deposit record not found. Please confirm the transaction has been scanned.", 404);
+  if (rows.length > 1) throw new CorrectionError("This transaction contains multiple deposit logs. Please specify logIndex to preview.", 400);
   return rows[0];
 }
 
@@ -71,7 +71,7 @@ async function findTargetWallet(db: DbLike, target: string) {
       ],
     },
   });
-  if (!wallet) throw new CorrectionError("没有找到目标用户钱包，请确认该用户已经登录过网站。", 404);
+  if (!wallet) throw new CorrectionError("Target user wallet not found. Please confirm the user has logged in.", 404);
   return wallet;
 }
 
@@ -86,7 +86,7 @@ async function buildCorrectionContext(input: {
   const currentWallet = await db.publicUserWallet.findUnique({
     where: { telegramUserId: chainDeposit.telegramUserId },
   });
-  if (!currentWallet) throw new CorrectionError("当前入账用户的钱包不存在，无法自动纠错。", 400);
+  if (!currentWallet) throw new CorrectionError("Current credited user's wallet does not exist. Cannot auto-correct.", 400);
 
   const currentOrder = await db.publicUserDepositOrder.findFirst({
     where: {
@@ -123,23 +123,23 @@ async function buildCorrectionContext(input: {
 
   const warnings: string[] = [];
   const errors: string[] = [];
-  if (currentWallet.telegramUserId === targetWallet.telegramUserId) errors.push("这笔入账已经属于目标用户，无需纠错。");
-  if (amount.lte(0)) errors.push("链上入账金额无效。");
-  if (decimal(currentWallet.availableBalance).lt(amount)) errors.push(`当前错误用户可用余额不足，无法扣回 ${money(amount)} USDT。`);
-  if (decimal(currentWallet.totalDeposited).lt(amount)) errors.push(`当前错误用户累计充值不足，无法扣回 ${money(amount)} USDT。`);
-  if (!currentLedger) errors.push("没有找到这笔入账对应的钱包流水，暂不自动纠错。");
+  if (currentWallet.telegramUserId === targetWallet.telegramUserId) errors.push("This deposit already belongs to the target user. No correction needed.");
+  if (amount.lte(0)) errors.push("On-chain deposit amount is invalid.");
+  if (decimal(currentWallet.availableBalance).lt(amount)) errors.push(`Current incorrect user's available balance is insufficient to deduct ${money(amount)} USDT.`);
+  if (decimal(currentWallet.totalDeposited).lt(amount)) errors.push(`Current incorrect user's total deposited is insufficient to deduct ${money(amount)} USDT.`);
+  if (!currentLedger) errors.push("Wallet ledger entry for this deposit not found. Cannot auto-correct.");
   if (selectedTargetOrder) {
-    if (selectedTargetOrder.walletId !== targetWallet.id) errors.push("选择的目标充值订单不属于目标用户。");
-    if (selectedTargetOrder.depositAddress !== chainDeposit.toAddress) errors.push("选择的目标充值订单地址与链上入账地址不一致。");
+    if (selectedTargetOrder.walletId !== targetWallet.id) errors.push("Selected target deposit order does not belong to the target user.");
+    if (selectedTargetOrder.depositAddress !== chainDeposit.toAddress) errors.push("Selected target deposit order address does not match the on-chain deposit address.");
     if (selectedTargetOrder.status === "PAID" && selectedTargetOrder.txHash !== chainDeposit.txHash) {
-      errors.push("选择的目标充值订单已经被其他交易支付，不能再次绑定。");
+      errors.push("Selected target deposit order has already been paid by another transaction and cannot be bound again.");
     }
     if (selectedTargetOrder.createdAt.getTime() > paidAt.getTime() || selectedTargetOrder.expiresAt.getTime() < paidAt.getTime()) {
-      warnings.push("选择的目标充值订单不在该交易付款时间窗口内，请确认后再执行。");
+      warnings.push("Selected target deposit order is not within the payment time window for this transaction. Please confirm before executing.");
     }
   }
-  if (currentOrder && currentOrder.status !== "PAID") warnings.push(`当前绑定充值单状态是 ${currentOrder.status}，执行时仍会清除该 tx 绑定。`);
-  if (candidateOrders.length === 0) warnings.push("没有找到付款时间窗口内的目标充值订单，将只按 tx 给目标用户补余额。 ");
+  if (currentOrder && currentOrder.status !== "PAID") warnings.push(`Current bound deposit order status is ${currentOrder.status}. Executing will still clear the tx binding.`);
+  if (candidateOrders.length === 0) warnings.push("No target deposit orders found within the payment time window. Will only credit balance to target user by tx.");
 
   const bindableCandidate = candidateOrders.find((item) => item.status !== "PAID" || item.txHash === chainDeposit.txHash);
   const ledgerReference = selectedTargetOrder ? `pub_deposit_order:${selectedTargetOrder.id}` : `${chainDeposit.txHash}:${chainDeposit.logIndex}`;
@@ -223,12 +223,12 @@ async function buildCorrectionContext(input: {
           beforeTotalDeposited: money(targetWallet.totalDeposited),
           afterTotalDeposited: money(decimal(targetWallet.totalDeposited).plus(amount)),
         },
-        wrongOrderAction: currentOrder ? `充值单 ${currentOrder.orderNo} 将改为 EXPIRED，并清除 ${shortHash(chainDeposit.txHash)} 绑定。` : "没有找到当前绑定充值单。",
+        wrongOrderAction: currentOrder ? `Deposit order ${currentOrder.orderNo} will be set to EXPIRED and ${shortHash(chainDeposit.txHash)} binding cleared.` : "No currently bound deposit order found.",
         targetOrderAction: selectedTargetOrder
-          ? `目标充值单 ${selectedTargetOrder.orderNo} 将标记为 PAID，并绑定该 tx。`
-          : "不绑定目标充值单，只按 tx 给目标用户补余额。",
-        chainDepositAction: "链上入账记录将改归属到目标用户。",
-        ledgerAction: `钱包流水将迁移到目标用户，reference 改为 ${ledgerReference}。`,
+          ? `Target deposit order ${selectedTargetOrder.orderNo} will be marked as PAID and bound to this tx.`
+          : "No target deposit order will be bound. Only crediting balance to target user by tx.",
+        chainDepositAction: "On-chain deposit record will be reassigned to target user.",
+        ledgerAction: `Wallet ledger entry will be migrated to target user, reference changed to ${ledgerReference}.`,
         canExecute: errors.length === 0,
         errors,
         warnings,
@@ -249,7 +249,7 @@ export async function GET(request: Request) {
     });
     return ok(context.preview);
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     if (error instanceof CorrectionError) return fail(error.message, error.status);
     return handleRouteError(error);
   }
@@ -260,7 +260,7 @@ export async function POST(request: Request) {
     await requireAdminSession();
     const body = await request.json().catch(() => ({}));
     if (String(body.confirmText || "").trim() !== "CONFIRM") {
-      return fail("请输入 CONFIRM 后再执行充值纠错。", 400);
+      return fail("Please enter CONFIRM before executing deposit correction.", 400);
     }
     const txHash = normalizeTxHash(body.txHash);
     const logIndex = normalizeLogIndex(body.logIndex);
@@ -271,8 +271,8 @@ export async function POST(request: Request) {
     const result = await prisma.$transaction(async (tx) => {
       const context = await buildCorrectionContext({ txHash, logIndex, target, targetOrderId }, tx);
       const { chainDeposit, currentWallet, currentOrder, currentLedger, targetWallet, selectedTargetOrder, amount } = context;
-      if (!context.preview.plan.canExecute) throw new CorrectionError(context.preview.plan.errors.join("；") || "当前状态无法执行纠错。", 400);
-      if (!currentLedger) throw new CorrectionError("没有找到对应钱包流水。", 400);
+      if (!context.preview.plan.canExecute) throw new CorrectionError(context.preview.plan.errors.join("; ") || "Cannot execute correction in current state.", 400);
+      if (!currentLedger) throw new CorrectionError("Corresponding wallet ledger entry not found.", 400);
 
       if (currentOrder) {
         await tx.publicUserDepositOrder.update({
@@ -320,7 +320,7 @@ export async function POST(request: Request) {
           walletId: targetWallet.id,
           telegramUserId: targetWallet.telegramUserId,
           referenceId,
-          note: adminNote || `充值纠错：从 ${currentWallet.telegramUsername ? `@${currentWallet.telegramUsername}` : currentWallet.telegramUserId} 改归属到 ${targetWallet.telegramUsername ? `@${targetWallet.telegramUsername}` : targetWallet.telegramUserId}，tx ${shortHash(chainDeposit.txHash)}`,
+          note: adminNote || `Deposit correction: reassigned from ${currentWallet.telegramUsername ? `@${currentWallet.telegramUsername}` : currentWallet.telegramUserId} to ${targetWallet.telegramUsername ? `@${targetWallet.telegramUsername}` : targetWallet.telegramUserId}, tx ${shortHash(chainDeposit.txHash)}`,
         },
       });
 
@@ -345,7 +345,7 @@ export async function POST(request: Request) {
 
     return ok(result);
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     if (error instanceof CorrectionError) return fail(error.message, error.status);
     return handleRouteError(error);
   }

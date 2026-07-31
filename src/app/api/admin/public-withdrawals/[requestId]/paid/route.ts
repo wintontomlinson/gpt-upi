@@ -111,13 +111,13 @@ export async function POST(request: Request, context: { params: Promise<{ reques
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     );
 
-    if (result.type === "notFound") return fail("提现申请不存在", 404);
-    if (result.type === "notPending") return fail("该提现申请已处理");
-    if (result.type === "walletNotFound") return fail("用户钱包不存在", 404);
-    if (result.type === "insufficientFrozen") return fail("用户冻结余额不足，不能标记已打款");
+    if (result.type === "notFound") return fail("Withdrawal request not found", 404);
+    if (result.type === "notPending") return fail("This withdrawal request has already been processed");
+    if (result.type === "walletNotFound") return fail("User wallet not found", 404);
+    if (result.type === "insufficientFrozen") return fail("User frozen balance insufficient, cannot mark as paid");
     return ok(serializeWithdrawal(result.withdrawal));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }

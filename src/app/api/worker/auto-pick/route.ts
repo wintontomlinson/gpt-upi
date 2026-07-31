@@ -24,7 +24,7 @@ export async function POST() {
   } catch (error) {
     if (error instanceof Response) return fail("Unauthorized", 401);
     const message = error instanceof Error ? error.message : "Auto-accept failed";
-    if (message.includes("上线") || message.includes("接单")) return fail(message);
+    if (message.includes("online") || message.includes("accept")) return fail(message);
     return handleRouteError(error);
   }
 }

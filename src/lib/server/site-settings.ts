@@ -14,14 +14,14 @@ export const SETTING_PUBLIC_CUSTOM_PROXY_ENABLED = "public_custom_proxy_enabled"
 
 export const DEFAULT_PUBLIC_PREMIUM_PURCHASE_PRICE = 1.5;
 export const DEFAULT_PUBLIC_FAQ_CONTENT_ZH = [
-  "Q: 应该转账多少？",
-  "A: 请严格支付充值订单显示的金额；钱包余额会按链上实际到账数量入账。",
+  "Q: How much should I transfer?",
+  "A: Pay the exact amount shown in the deposit order. The wallet balance is credited by the actual on-chain amount received.",
   "",
-  "Q: 转错金额怎么办？",
-  "A: 金额可能会匹配到其他用户的有效充值订单。错误转账无法退款，也无法手动补发余额。",
+  "Q: What if I transfer the wrong amount?",
+  "A: The amount may match another user's active deposit order. Wrong transfers cannot be refunded or manually credited.",
   "",
-  "Q: 支持哪条链？",
-  "A: 仅支持 BSC / BEP20 USDT。",
+  "Q: Which chain is supported?",
+  "A: BSC / BEP20 USDT only.",
 ].join("\n");
 export const DEFAULT_PUBLIC_FAQ_CONTENT_EN = [
   "Q: What amount should I transfer?",
@@ -161,7 +161,7 @@ export async function setPublicFaqContentEn(content: string) {
 export async function setPublicPremiumPurchasePrice(price: number) {
   const numeric = Number(price);
   if (!Number.isFinite(numeric) || numeric <= 0) {
-    throw new Error("Premium 售卖价格必须大于 0");
+    throw new Error("Premium sale price must be greater than 0");
   }
 
   await prisma.systemSetting.upsert({

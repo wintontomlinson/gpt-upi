@@ -43,7 +43,7 @@ export const ORDER_TTL_MS = 5 * 60 * 1000;
 export const PUBLIC_SCAN_ASSIGNED_CHECK_GRACE_MS = 5 * 60 * 1000;
 export const PUBLIC_SCAN_PENDING_AUTO_RETURN_BEFORE_MS = 60 * 1000;
 export const PUBLIC_SCAN_PENDING_AUTO_RETURN_REASON =
-  "扫码订单未被接取，二维码剩余有效期不足 1 分钟，系统已自动退回并退款。";
+  "Scan order was not accepted. QR code has less than 1 minute remaining. System has auto-returned and refunded.";
 export const MAX_ACTIVE_ORDERS_PER_WORKER = 3;
 
 export function generateCustomerOrderToken() {
@@ -61,14 +61,14 @@ export function verifyCustomerOrderToken(order: Pick<OrderWithRelations, "custom
 
 function assertAvailableCdk(cdk: Cdk) {
   if (cdk.status !== "ACTIVE") {
-    throw new Error("CDK 不可用或已停用");
+    throw new Error("CDK is unavailable or deactivated");
   }
   if (cdk.expiresAt && cdk.expiresAt.getTime() <= Date.now()) {
-    throw new Error("CDK 已过期");
+    throw new Error("CDK has expired");
   }
   const available = cdk.totalCount - cdk.usedCount - cdk.frozenCount;
   if (available <= 0) {
-    throw new Error("CDK 可用次数不足");
+    throw new Error("CDK has no remaining uses");
   }
 }
 
@@ -219,7 +219,7 @@ async function getOrderOrThrow(tx: Prisma.TransactionClient, orderId: string) {
     where: { id: orderId },
     include: orderInclude,
   });
-  if (!order) throw new Error("订单不存在");
+  if (!order) throw new Error("Order not found");
   return order as OrderWithRelations;
 }
 
@@ -317,7 +317,7 @@ export async function expireStaleOrders() {
             workerId: locked.assignedWorkerId,
             orderId: locked.id,
             result: OrderResult.EXPIRED,
-            note: "UPI 二维码过期，扫码订单已自动关闭并退回用户冻结余额。",
+            note: "UPI QR code expired. Scan order has been automatically closed and frozen balance returned to user.",
           },
         });
       }
@@ -359,7 +359,7 @@ export async function createCustomerOrder(input: {
   return prisma.$transaction(
     async (tx) => {
       const cdk = await lockCdk(tx, code);
-      if (!cdk) throw new Error("CDK 不存在");
+      if (!cdk) throw new Error("CDK does not exist");
       assertAvailableCdk(cdk);
 
       await tx.cdk.update({
@@ -411,21 +411,21 @@ export async function reuploadOrder(input: {
 }) {
   return prisma.$transaction(async (tx) => {
     const locked = await lockOrder(tx, input.orderId);
-    if (!locked) throw new Error("订单不存在");
+    if (!locked) throw new Error("Order not found");
     if (await expireLockedOrderIfNeeded(tx, locked)) {
-      throw new Error("订单已超过 5 分钟有效期，请重新提交");
+      throw new Error("Order has exceeded 5 minute validity. Please resubmit");
     }
     if (locked.status !== "NEED_REUPLOAD") {
-      throw new Error("当前订单不需要重新上传二维码");
+      throw new Error("This order does not need QR code re-upload");
     }
 
     if (locked.holdsFrozenCount) {
       await releaseFrozenUseIfHeld(tx, locked);
     }
 
-    if (!locked.cdkId) throw new Error("该订单不是 CDK 订单，不能重新上传。");
+    if (!locked.cdkId) throw new Error("This order is not a CDK order and cannot be re-uploaded.");
     const cdk = await lockCdkById(tx, locked.cdkId);
-    if (!cdk) throw new Error("CDK 不存在");
+    if (!cdk) throw new Error("CDK does not exist");
     assertAvailableCdk(cdk);
 
     await tx.cdk.update({
@@ -461,40 +461,40 @@ export async function completeOrder(input: {
 }) {
   return prisma.$transaction(async (tx) => {
     const locked = await lockOrder(tx, input.orderId);
-    if (!locked) throw new Error("订单不存在");
+    if (!locked) throw new Error("Order not found");
 
     if (await expireLockedOrderIfNeeded(tx, locked)) {
-      throw new Error("订单已超过 5 分钟有效期，冻结次数已退回");
+      throw new Error("Order has exceeded 5 minute validity. Frozen uses have been returned");
     }
     if (locked.status === "COMPLETED") {
       return { order: await getOrderOrThrow(tx, input.orderId), changed: false };
     }
     if (!activeStatuses.includes(locked.status)) {
-      throw new Error("当前订单状态不能完成");
+      throw new Error("Order cannot be completed in current status");
     }
     if (input.workerId && locked.assignedWorkerId !== input.workerId) {
-      throw new Error("只能完成自己正在处理的订单");
+      throw new Error("Can only complete orders assigned to yourself");
     }
     if (input.workerId && locked.status !== "ASSIGNED") {
-      throw new Error("只能完成自己已接取的订单");
+      throw new Error("Can only complete orders you have accepted");
     }
     if (locked.sessionCredentialEncrypted && locked.upiExtractionStatus !== "READY") {
-      throw new Error("请先生成 UPI 二维码，生成成功后才能完成订单");
+      throw new Error("Please generate the UPI QR code first. Order can only be completed after generation succeeds");
     }
     if (locked.sessionCredentialEncrypted && !locked.qrImageUrl) {
-      throw new Error("UPI 二维码尚未生成，不能完成订单");
+      throw new Error("UPI QR code has not been generated yet. Cannot complete order");
     }
     if (
       locked.sessionCredentialEncrypted &&
       (!locked.upiExpiresAt || (locked.upiExpiresAt.getTime() <= Date.now() && !isWithinPublicScanAssignedCheckGrace(locked)))
     ) {
-      throw new Error("UPI 二维码已过期，请重新生成后再完成订单");
+      throw new Error("UPI QR code has expired. Please regenerate before completing the order");
     }
 
     const order = await finalizeCompletedOrder(tx, locked, {
       orderId: input.orderId,
       completedBy: input.completedBy,
-      note: input.completedBy === "CUSTOMER" ? "客户确认完成" : "接单方确认完成",
+      note: input.completedBy === "CUSTOMER" ? "Customer confirmed completion" : "Worker confirmed completion",
     });
 
     return { order, changed: true };
@@ -508,7 +508,7 @@ export async function prepareSubscriptionCheck(input: {
   return prisma.$transaction(
     async (tx) => {
       const locked = await lockOrder(tx, input.orderId);
-      if (!locked) throw new Error("订单不存在");
+      if (!locked) throw new Error("Order not found");
       if (locked.status === "COMPLETED") {
         return {
           type: "completed" as const,
@@ -516,22 +516,22 @@ export async function prepareSubscriptionCheck(input: {
         };
       }
       if (locked.status === "CHECKING") {
-        throw new Error("订单正在检测订阅状态，请稍后刷新");
+        throw new Error("Order is currently checking subscription status. Please refresh later");
       }
       if (locked.status !== "ASSIGNED" || locked.assignedWorkerId !== input.workerId) {
-        throw new Error("只能检测自己已接取的订单");
+        throw new Error("Can only check orders assigned to yourself");
       }
       if (!locked.sessionCredentialEncrypted) {
-        throw new Error("该订单没有可用于检测的 session token");
+        throw new Error("This order has no session token available for checking");
       }
       if (locked.upiExtractionStatus !== "READY" || !locked.qrImageUrl) {
-        throw new Error("请先生成 UPI 二维码，生成成功后再检测订阅");
+        throw new Error("Please generate the UPI QR code first before checking subscription");
       }
       if (!locked.upiExpiresAt) {
-        throw new Error("UPI 二维码已过期，请重新生成后再检测");
+        throw new Error("UPI QR code has expired. Please regenerate before checking");
       }
       if (locked.upiExpiresAt.getTime() <= Date.now() && !isWithinPublicScanAssignedCheckGrace(locked)) {
-        throw new Error("二维码检查等待期已结束，请重新生成或报告问题 / QR check grace period has ended. Please regenerate or report the order issue.");
+        throw new Error("QR check grace period has ended. Please regenerate or report the order issue.");
       }
       await tx.order.update({
         where: { id: input.orderId },
@@ -563,12 +563,12 @@ export async function completeSubscriptionCheckedOrder(input: {
 }) {
   return prisma.$transaction(async (tx) => {
     const locked = await lockOrder(tx, input.orderId);
-    if (!locked) throw new Error("订单不存在");
+    if (!locked) throw new Error("Order not found");
     if (locked.status === "COMPLETED") {
       return { order: await getOrderOrThrow(tx, input.orderId), changed: false };
     }
     if (locked.status !== "CHECKING" || locked.assignedWorkerId !== input.workerId) {
-      throw new Error("订单检测状态已变化，请刷新后重试");
+      throw new Error("Order check status has changed. Please refresh and retry");
     }
 
     await tx.order.update({
@@ -584,7 +584,7 @@ export async function completeSubscriptionCheckedOrder(input: {
     const order = await finalizeCompletedOrder(tx, locked, {
       orderId: input.orderId,
       completedBy: "WORKER",
-      note: `订阅状态已更新为 ${input.planType || "plus"}，系统检测完成`,
+      note: `Subscription updated to ${input.planType || "plus"}. System check completed`,
       planType: input.planType,
     });
     return { order, changed: true };
@@ -600,12 +600,12 @@ export async function failSubscriptionCheck(input: {
 }) {
   return prisma.$transaction(async (tx) => {
     const locked = await lockOrder(tx, input.orderId);
-    if (!locked) throw new Error("订单不存在");
+    if (!locked) throw new Error("Order not found");
     if (locked.status === "COMPLETED") {
       return { order: await getOrderOrThrow(tx, input.orderId), canRetry: false };
     }
     if (locked.status !== "CHECKING" || locked.assignedWorkerId !== input.workerId) {
-      throw new Error("订单检测状态已变化，请刷新后重试");
+      throw new Error("Order check status has changed. Please refresh and retry");
     }
 
     await tx.order.update({
@@ -631,16 +631,16 @@ export async function failSubscriptionCheck(input: {
 export async function cancelOrder(orderId: string) {
   return prisma.$transaction(async (tx) => {
     const locked = await lockOrder(tx, orderId);
-    if (!locked) throw new Error("订单不存在");
+    if (!locked) throw new Error("Order not found");
     if (await expireLockedOrderIfNeeded(tx, locked)) {
       return { order: await getOrderOrThrow(tx, orderId), changed: false };
     }
-    if (locked.status === "COMPLETED") throw new Error("已完成订单不能取消");
+    if (locked.status === "COMPLETED") throw new Error("Completed orders cannot be cancelled");
     if (["CANCELLED", "FAILED", "EXPIRED"].includes(locked.status)) {
       return { order: await getOrderOrThrow(tx, orderId), changed: false };
     }
     if (locked.status !== "PENDING") {
-      throw new Error("只能取消尚未被接取的订单");
+      throw new Error("Can only cancel orders that have not been accepted yet");
     }
 
     await releaseFrozenUseIfHeld(tx, locked);
@@ -651,7 +651,7 @@ export async function cancelOrder(orderId: string) {
           workerId: locked.assignedWorkerId,
           orderId,
           result: OrderResult.CANCELLED,
-          note: "客户取消，冻结次数已退回",
+          note: "Customer cancelled. Frozen uses have been returned",
         },
       });
     }
@@ -670,9 +670,9 @@ export async function releaseAssignedOrder(input: { orderId: string; workerId: s
   return prisma.$transaction(
     async (tx) => {
       const locked = await lockOrder(tx, input.orderId);
-      if (!locked) throw new Error("订单不存在");
+      if (!locked) throw new Error("Order not found");
       if (locked.status !== "ASSIGNED" || locked.assignedWorkerId !== input.workerId) {
-        throw new Error("只能释放自己已接取且未进入检测的订单");
+        throw new Error("Can only release orders assigned to yourself that haven't entered checking");
       }
 
       await tx.workerActiveOrder.deleteMany({ where: { orderId: input.orderId, workerId: input.workerId } });
@@ -874,8 +874,8 @@ export async function autoAssignPendingOrder(): Promise<AutoAssignResult | null>
 export async function autoPickOrder(workerId: string) {
   const requester = await prisma.$transaction(async (tx) => {
     const locked = await lockWorker(tx, workerId);
-    if (!locked) throw new Error("接单方不存在");
-    if (locked.status !== WorkerStatus.ONLINE) throw new Error("请先上线再开启自动接单");
+    if (!locked) throw new Error("Worker not found");
+    if (locked.status !== WorkerStatus.ONLINE) throw new Error("Please go online before enabling auto-accept");
     if (!locked.autoAcceptEnabled) return null;
 
     const activeCount = await tx.workerActiveOrder.count({ where: { workerId } });
@@ -901,12 +901,12 @@ export async function markOrderProblem(input: {
 }) {
   return prisma.$transaction(async (tx) => {
     const locked = await lockOrder(tx, input.orderId);
-    if (!locked) throw new Error("订单不存在");
+    if (!locked) throw new Error("Order not found");
     if (await expireLockedOrderIfNeeded(tx, locked)) {
-      throw new Error("订单已超过 5 分钟有效期");
+      throw new Error("Order has exceeded 5 minute validity");
     }
     if (locked.status !== "ASSIGNED" || locked.assignedWorkerId !== input.workerId) {
-      throw new Error("只能处理自己已接取的订单");
+      throw new Error("Can only process orders assigned to yourself");
     }
 
     await tx.workerOrderRecord.create({

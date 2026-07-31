@@ -59,7 +59,7 @@ export async function GET(request: Request) {
 
     return ok(paginatedPayload(orders.map(serializeOrder), { page, pageSize, total, search }));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }

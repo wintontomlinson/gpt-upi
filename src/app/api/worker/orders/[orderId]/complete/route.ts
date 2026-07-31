@@ -16,18 +16,18 @@ export async function POST(_request: Request, context: { params: Promise<{ order
       order: serializeWorkerOrder(result.order),
     });
   } catch (error) {
-    if (error instanceof Response) return fail("未登录 / Unauthorized", 401);
-    const message = error instanceof Error ? error.message : "完成失败 / Complete failed";
+    if (error instanceof Response) return fail("Unauthorized", 401);
+    const message = error instanceof Error ? error.message : "Complete failed";
     if (
-      message.includes("订单") ||
-      message.includes("自己") ||
-      message.includes("状态") ||
+      message.includes("order") ||
+      message.includes("self") ||
+      message.includes("status") ||
       message.includes("UPI") ||
-      message.includes("二维码") ||
-      message.includes("过期") ||
-      message.includes("生成") ||
-      message.includes("订阅") ||
-      message.includes("检测") ||
+      message.includes("QR code") ||
+      message.includes("expired") ||
+      message.includes("generate") ||
+      message.includes("subscription") ||
+      message.includes("check") ||
       message.includes("session") ||
       message.toLowerCase().includes("order") ||
       message.toLowerCase().includes("subscription") ||

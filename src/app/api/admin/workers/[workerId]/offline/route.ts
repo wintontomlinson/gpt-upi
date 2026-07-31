@@ -72,14 +72,14 @@ export async function POST(_request: Request, context: { params: Promise<{ worke
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     );
 
-    if (result.type === "notFound") return fail("接单账号不存在", 404);
+    if (result.type === "notFound") return fail("Worker account not found", 404);
     if (result.type === "hasActiveOrder") {
-      return fail(result.orderNo ? `该接单方有进行中订单 ${result.orderNo}，完成或退回后才能下线` : "该接单方有进行中订单，完成或退回后才能下线");
+      return fail(result.orderNo ? `This worker has an active order ${result.orderNo}. Complete or return it before going offline` : "This worker has an active order. Complete or return it before going offline");
     }
 
     return ok(serializeWorker(result.worker));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }

@@ -45,7 +45,7 @@ export async function GET(request: Request) {
     const total = await prisma.workerWithdrawalRequest.count({ where });
     return ok(paginatedPayload(items, { page, pageSize, total, search }));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }

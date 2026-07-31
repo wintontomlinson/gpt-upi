@@ -11,8 +11,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const enabled = Boolean(body.enabled);
     const current = await prisma.worker.findUnique({ where: { id: worker.id } });
-    if (!current) return fail("接单方不存在", 404);
-    if (enabled && current.status !== "ONLINE") return fail("请先上线再开启自动接单");
+    if (!current) return fail("Worker not found", 404);
+    if (enabled && current.status !== "ONLINE") return fail("Please go online before enabling auto-accept");
 
     const updated = await prisma.worker.update({
       where: { id: worker.id },
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     });
     return ok(serializeWorker(updated));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录", 401);
+    if (error instanceof Response) return fail("Unauthorized", 401);
     return handleRouteError(error);
   }
 }

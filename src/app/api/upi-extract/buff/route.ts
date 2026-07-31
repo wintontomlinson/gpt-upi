@@ -99,7 +99,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const type = String(body.type || "").trim();
     const viewerId = normalizeViewerId(body.viewerId);
-    if (!viewerId) return fail("Buff 会话无效", 400);
+    if (!viewerId) return fail("Buff session invalid", 400);
 
     if (type === "buff") {
       const buffCount = await incrementCounter(BUFF_TOTAL_KEY);
@@ -116,7 +116,7 @@ export async function POST(request: Request) {
       return ok(await getStats(null, viewerId));
     }
 
-    return fail("未知 Buff 操作", 400);
+    return fail("Unknown Buff action", 400);
   } catch (error) {
     return handleRouteError(error);
   }

@@ -10,13 +10,13 @@ export async function POST(request: Request, context: { params: Promise<{ orderI
     const worker = await requireWorkerSession();
     const { orderId } = await context.params;
     const body = await request.json();
-    const reason = String(body.reason || "").trim() || "UPI 二维码无法生成或无法处理，请更换 session token 后重新提交。";
+    const reason = String(body.reason || "").trim() || "UPI QR code cannot be generated or processed. Please replace session token and resubmit.";
     const order = await markOrderProblem({ orderId, workerId: worker.id, reason });
     return ok(serializeWorkerOrder(order));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录", 401);
-    const message = error instanceof Error ? error.message : "标记异常失败";
-    if (message.includes("订单") || message.includes("自己")) return fail(message);
+    if (error instanceof Response) return fail("Unauthorized", 401);
+    const message = error instanceof Error ? error.message : "Failed to mark as problem";
+    if (message.includes("order") || message.includes("self")) return fail(message);
     return handleRouteError(error);
   }
 }

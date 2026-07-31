@@ -32,7 +32,7 @@ export async function GET(request: Request) {
       itemsPagination: pagedItems.pagination,
     });
   } catch (error) {
-    if (error instanceof Response) return fail("未授权", 401);
+    if (error instanceof Response) return fail("Unauthorized", 401);
     return handleRouteError(error);
   }
 }
@@ -62,23 +62,23 @@ export async function POST(request: Request) {
       return ok({ ...(await getAdminPublicUpiExtractState()), changed: result.changed });
     }
     if (action === "failAll") {
-      const result = await failAllPublicUpiExtractJobs(String(body.reason || "管理员已停止提取任务"));
+      const result = await failAllPublicUpiExtractJobs(String(body.reason || "Admin stopped extraction tasks"));
       return ok({ ...(await getAdminPublicUpiExtractState()), changed: result.changed });
     }
     if (action === "start") {
-      if (!jobId) return fail("缺少任务 ID");
+      if (!jobId) return fail("Job ID is required");
       await startPublicUpiExtractJob(jobId);
       return ok(await getAdminPublicUpiExtractState());
     }
     if (action === "stop") {
-      if (!jobId) return fail("缺少任务 ID");
+      if (!jobId) return fail("Job ID is required");
       await stopPublicUpiExtractJob(jobId);
       return ok(await getAdminPublicUpiExtractState());
     }
 
-    return fail("未知操作");
+    return fail("Unknown action");
   } catch (error) {
-    if (error instanceof Response) return fail("未授权", 401);
+    if (error instanceof Response) return fail("Unauthorized", 401);
     return handleRouteError(error);
   }
 }

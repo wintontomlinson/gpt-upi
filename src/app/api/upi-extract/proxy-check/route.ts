@@ -8,12 +8,12 @@ export async function POST(request: Request) {
   try {
     const settings = await getPublicSiteSettings();
     if (!settings.customProxyEnabled) {
-      return fail("自定义代理功能已关闭，请使用服务端代理池。", 410);
+      return fail("Custom proxy feature is disabled. Please use the server proxy pool.", 410);
     }
 
     const body = (await request.json().catch(() => ({}))) as { proxyUrl?: unknown };
     const proxyUrl = String(body.proxyUrl || "").trim();
-    if (!proxyUrl) return fail("请先填写代理地址。", 400);
+    if (!proxyUrl) return fail("Please enter a proxy URL first.", 400);
 
     const entry = (() => {
       try {
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         return null;
       }
     })();
-    if (!entry) return fail("代理地址格式错误。", 400);
+    if (!entry) return fail("Invalid proxy URL format.", 400);
     const result = await checkUpstreamProxy(entry, { timeoutMs: 15_000, expectedCountry: "" });
     return ok({ result });
   } catch (error) {

@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const amount = parseMoneyAmount(body.amount);
     const note = String(body.note || "").trim();
-    if (!amount) return fail("请输入正确的提现金额");
+    if (!amount) return fail("Please enter a valid withdrawal amount");
 
     const requestRecord = await createWithdrawalRequest({
       workerId: worker.id,
@@ -21,8 +21,8 @@ export async function POST(request: Request) {
     return ok(serializeWorkerWithdrawalRequest(requestRecord));
   } catch (error) {
     if (error instanceof Response) return fail("Unauthorized", 401);
-    const message = error instanceof Error ? error.message : "提现申请失败";
-    if (message.includes("Binance") || message.includes("余额") || message.includes("接单方")) return fail(message);
+    const message = error instanceof Error ? error.message : "Withdrawal request failed";
+    if (message.includes("Binance") || message.includes("balance") || message.includes("worker")) return fail(message);
     return handleRouteError(error);
   }
 }

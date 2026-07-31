@@ -15,8 +15,8 @@ export async function POST(request: Request) {
       where: { id: worker.id },
       select: { id: true, telegramUserId: true },
     });
-    if (!current) return fail("接单方不存在", 404);
-    if (enabled && !current.telegramUserId) return fail("当前账号尚未绑定 Telegram ID，无法开启通知");
+    if (!current) return fail("Worker not found", 404);
+    if (enabled && !current.telegramUserId) return fail("This account has not bound a Telegram ID. Cannot enable notifications");
 
     const updated = await prisma.worker.update({
       where: { id: worker.id },
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
     return ok(serializeWorker(updated));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录", 401);
+    if (error instanceof Response) return fail("Unauthorized", 401);
     return handleRouteError(error);
   }
 }

@@ -129,7 +129,7 @@ export async function GET(request: Request) {
     const total = await prisma.worker.count({ where });
     return ok(paginatedPayload(items, { page, pageSize, total, search }));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }
@@ -145,9 +145,9 @@ export async function POST(request: Request) {
     const unitPrice = parseUnitPrice(body.unitPrice);
     const payoutMode = body.payoutMode === "PREPAID" ? "PREPAID" : "POSTPAID";
     const binanceUserId = String(body.binanceUserId || "").trim() || null;
-    if (!username) return fail("请输入账号标识");
-    if (!telegramUserId && !telegramUsername) return fail("请至少填写 Telegram ID 或 Telegram 用户名");
-    if (unitPrice === null) return fail("单价必须是大于或等于 0 的数字");
+    if (!username) return fail("Username is required");
+    if (!telegramUserId && !telegramUsername) return fail("Telegram ID or username is required");
+    if (unitPrice === null) return fail("Unit price must be a number >= 0");
 
     const passwordHash = await bcrypt.hash(randomBytes(24).toString("base64url"), 10);
     const worker = await prisma.worker.create({
@@ -182,9 +182,9 @@ export async function POST(request: Request) {
       wallet: await getWorkerWalletSummary(worker.id),
     });
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
-    const message = error instanceof Error ? error.message : "创建接单账号失败";
-    if (message.includes("Unique")) return fail("账号已存在");
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
+    const message = error instanceof Error ? error.message : "Failed to create worker account";
+    if (message.includes("Unique")) return fail("Account already exists");
     return handleRouteError(error);
   }
 }

@@ -67,7 +67,7 @@ async function assertCdkRedeemRateLimit(telegramUserId: string) {
 
       const recent = timestamps.filter((item) => item >= cutoff);
       if (recent.length >= CDK_REDEEM_RATE_LIMIT_COUNT) {
-        throw new Error("CDK 兑换太频繁，请 1 分钟后再试。");
+        throw new Error("CDK redeem rate limited. Please try again in 1 minute.");
       }
       recent.push(now);
 
@@ -83,7 +83,7 @@ async function assertCdkRedeemRateLimit(telegramUserId: string) {
 export async function POST(request: Request) {
   try {
     const user = await getPublicUserSession();
-    if (!user) return fail("请先登录 Telegram 账户。", 401);
+    if (!user) return fail("Please login first.", 401);
 
     const body = (await request.json().catch(() => ({}))) as { code?: unknown };
     await assertCdkRedeemRateLimit(user.telegramUserId);
@@ -110,9 +110,9 @@ export async function POST(request: Request) {
       premium,
     });
   } catch (error) {
-    if (error instanceof Response) return fail("请先登录 Telegram 账户。", 401);
-    const message = error instanceof Error ? error.message : "CDK 兑换失败";
-    if (message.includes("CDK") || message.includes("兑换") || message.includes("频繁")) return fail(message);
+    if (error instanceof Response) return fail("Please login first.", 401);
+    const message = error instanceof Error ? error.message : "CDK redeem failed";
+    if (message.includes("CDK") || message.includes("redeem") || message.includes("rate limit")) return fail(message);
     return handleRouteError(error);
   }
 }

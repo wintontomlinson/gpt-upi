@@ -139,7 +139,7 @@ export class EmailBoundError extends Error {
   email: string;
 
   constructor(email: string) {
-    super(email ? `该账号已绑定邮箱 ${email}，无法提取 UPI 链接` : "该账号已绑定邮箱，无法提取 UPI 链接");
+    super(email ? `This account is bound to email ${email} and cannot extract UPI link` : "This account is bound to an email and cannot extract UPI link");
     this.name = "EmailBoundError";
     this.email = email;
   }
@@ -178,7 +178,7 @@ export class PaymentMethodUnavailableError extends Error {
 
 export class BillingCountryLockedError extends Error {
   constructor() {
-    super("该账号地区已被 OpenAI 锁定，无法更改账单地址。");
+    super("This account's region has been locked by OpenAI. Cannot change billing address.");
     this.name = "BillingCountryLockedError";
   }
 }
@@ -635,14 +635,14 @@ async function fetchText(url: string, init: RequestInit = {}, proxyUrl = "") {
   if (looksLikeCloudflareChallenge(text)) {
     return {
       status: 502,
-      data: { error: "请求被 Cloudflare 拦截，请稍后重试或更换服务器出口。" },
+      data: { error: "Request blocked by Cloudflare. Please retry later or switch server exit." },
       response,
     };
   }
   try {
     return { status: response.status, data: JSON.parse(text || "{}") as unknown, response };
   } catch {
-    return { status: response.status, data: { error: text.slice(0, 2000) || "返回不是 JSON" }, response };
+    return { status: response.status, data: { error: text.slice(0, 2000) || "Response is not JSON" }, response };
   }
 }
 
@@ -669,7 +669,7 @@ async function resolveCredential(credential: string, proxyUrl = ""): Promise<Res
 
   const token = jsonGetAccessToken(data);
   if (!token) {
-    throw new Error(`session 响应中没有 accessToken：${compactError(data)}`);
+    throw new Error(`No accessToken in session response: ${compactError(data)}`);
   }
 
   return { accessToken: token, sessionData: data };
@@ -712,7 +712,7 @@ export async function validateCredentialForUpiExtraction(credential: string) {
   }
 
   if (firstError && errors.length === 0) throw firstError;
-  throw new Error(`session token 校验失败，已尝试 ${attempts.length} 个出口：${errors.join(" | ")}`);
+  throw new Error(`Session token validation failed after ${attempts.length} proxy attempts: ${errors.join(" | ")}`);
 }
 
 async function callAccountCheck(accessToken: string, cookie: string, proxyUrl: string) {
@@ -766,7 +766,7 @@ export async function checkChatGptSubscription(credential: string): Promise<Chat
   }
 
   if (firstError && errors.length === 0) throw firstError;
-  throw new Error(`订阅状态检测失败，已尝试 ${attempts.length} 个出口：${errors.join(" | ")}`);
+  throw new Error(`Subscription check failed after ${attempts.length} proxy attempts: ${errors.join(" | ")}`);
 }
 
 function checkoutPayload() {
@@ -1470,7 +1470,7 @@ async function hydrateUpiQrData(qrData: UpiQrData, proxyUrl: string) {
 
 async function makeUpiQrPng(upiUri: string) {
   if (!upiUri.toLowerCase().startsWith("upi://")) {
-    throw new Error("提取到的数据不是 upi:// 协议，无法生成 UPI 二维码");
+    throw new Error("Extracted data is not a upi:// protocol. Cannot generate UPI QR code");
   }
   return QRCode.toBuffer(upiUri, {
     type: "png",
@@ -1646,8 +1646,8 @@ function isNonRetryableCredentialError(error: unknown) {
     lower.includes("token_revoked") ||
     lower.includes("user is already paid") ||
     lower.includes("already paid") ||
-    message.includes("没有识别到有效的 session token") ||
-    message.includes("娌℃湁璇嗗埆鍒版湁鏁堢殑 session token")
+    message.includes("no valid session token recognized") ||
+    message.includes("no valid session token")
   );
 }
 
@@ -2753,7 +2753,7 @@ async function extractUpiQrFromCredentialWithProxy(
   const publishableKey = String(checkout.data.publishable_key || "").trim();
   const processorEntity = String(checkout.data.processor_entity || "openai_llc").trim() || "openai_llc";
   if (!checkoutSessionId || !publishableKey) {
-    throw new Error(`checkout 响应缺少必要字段：${compactError(checkout.data)}`);
+    throw new Error(`Checkout response missing required fields: ${compactError(checkout.data)}`);
   }
 
   const steps: ExtractedUpiQr["steps"] = [];
@@ -2932,7 +2932,7 @@ async function extractUpiQrFromCredentialWithProxy(
   });
   if (approval.status >= 400 || approvalResultText !== "approved") {
     const approveAttempts = approval.attemptStatuses?.length ? ` approve_attempts=${approval.attemptStatuses.join("/")}` : "";
-    throw new UpiQrUnavailableError(`ChatGPT approval 返回异常：HTTP ${approval.status} ${compactError(approval.data)}.${approveAttempts}`);
+    throw new UpiQrUnavailableError(`ChatGPT approval returned error: HTTP ${approval.status} ${compactError(approval.data)}.${approveAttempts}`);
   }
 
   let qrData: UpiQrData = {};
@@ -3022,12 +3022,12 @@ async function extractUpiQrFromCredentialWithProxy(
       const result = step.result ? ` result=${String(step.result)}` : "";
       return `${step.name}:${step.status}${state}${result}${suffix}`;
     }).join(" -> ");
-    let detail = `未在协议响应中拿到 upi:// 数据，无法生成二维码。已完成步骤：${stepText || "none"}。`;
+    let detail = `No upi:// data found in protocol response. Cannot generate QR code. Completed steps: ${stepText || "none"}.`;
     if (approval.status < 400 && isObject(approval.data) && String(approval.data.result || "").toLowerCase() === "approved") {
-      detail += " ChatGPT 已返回 approved，但 Stripe 未下发 UPI 二维码字段，可能是该 checkout/账号/出口暂未生成 UPI 指令，请稍后重试或更换代理出口。";
+      detail += " ChatGPT returned approved but Stripe did not provide UPI QR code field. The checkout/account/exit may not have generated a UPI instruction. Please retry later or switch proxy exit.";
     }
     if (approval.status >= 400 || (isObject(approval.data) && ["blocked", "exception"].includes(String(approval.data.result || "").toLowerCase()))) {
-      detail += ` ChatGPT approval 返回异常：HTTP ${approval.status} ${compactError(approval.data)}`;
+      detail += ` ChatGPT approval returned error: HTTP ${approval.status} ${compactError(approval.data)}`;
     }
     throw new UpiQrUnavailableError(detail);
   }

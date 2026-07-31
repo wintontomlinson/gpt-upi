@@ -64,10 +64,10 @@ export async function POST(_request: Request, context: { params: Promise<{ order
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     );
 
-    if (prepared.type === "notFound") return fail("订单不存在，或不属于当前接单方", 404);
-    if (prepared.type === "publicScan") return fail("该订单的二维码由用户发布，接单方无需重新生成。");
-    if (prepared.type === "missingCredential") return fail("该订单没有可用于提取的 session token");
-    if (prepared.type === "generating") return fail("UPI 二维码正在生成中，请稍后刷新");
+    if (prepared.type === "notFound") return fail("Order not found or does not belong to current worker", 404);
+    if (prepared.type === "publicScan") return fail("This order's QR code was published by the user. Worker does not need to regenerate.");
+    if (prepared.type === "missingCredential") return fail("This order has no session token available for extraction");
+    if (prepared.type === "generating") return fail("UPI QR code is being generated. Please refresh later");
     encryptedCredential = prepared.encryptedCredential;
   } catch (error) {
     return handleRouteError(error);
@@ -98,18 +98,18 @@ export async function POST(_request: Request, context: { params: Promise<{ order
       },
     });
     if (updated.count !== 1) {
-      return fail("订单状态已变化，请刷新后重试", 409);
+      return fail("Order status has changed. Please refresh and retry", 409);
     }
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: orderInclude,
     });
-    if (!order) return fail("订单不存在", 404);
+    if (!order) return fail("Order not found", 404);
 
     return ok(serializeWorkerOrder(order));
   } catch (error) {
-    const message = error instanceof Error ? error.message : "UPI 二维码生成失败";
+    const message = error instanceof Error ? error.message : "UPI QR code generation failed";
     await prisma.order.updateMany({
       where: {
         id: orderId,
@@ -131,8 +131,8 @@ export async function POST(_request: Request, context: { params: Promise<{ order
       message.includes("checkout") ||
       message.includes("session") ||
       message.includes("Cloudflare") ||
-      message.includes("协议响应") ||
-      message.includes("二维码")
+      message.includes("protocol response") ||
+      message.includes("QR code")
     ) {
       return fail(message);
     }

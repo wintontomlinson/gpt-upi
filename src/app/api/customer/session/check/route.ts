@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const credential = String(body.sessionToken || body.credential || "").trim();
-    if (!credential) return fail("请输入 session token");
+    if (!credential) return fail("Please enter session token");
 
     await validateCredentialForUpiExtraction(credential);
     return ok({ canSubmit: true });
@@ -15,8 +15,8 @@ export async function POST(request: Request) {
     if (error instanceof EmailBoundError) {
       return fail(error.message, 403, { email: error.email });
     }
-    const message = error instanceof Error ? error.message : "session token 校验失败";
-    if (message.includes("session") || message.includes("邮箱") || message.includes("token") || message.includes("Cloudflare")) {
+    const message = error instanceof Error ? error.message : "Session token validation failed";
+    if (message.includes("session") || message.includes("email") || message.includes("token") || message.includes("Cloudflare")) {
       return fail(message);
     }
     return handleRouteError(error);

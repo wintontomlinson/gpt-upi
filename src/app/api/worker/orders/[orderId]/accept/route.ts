@@ -12,9 +12,9 @@ export async function POST(_request: Request, context: { params: Promise<{ order
     const order = await acceptOrder(orderId, worker.id);
     return ok(serializeWorkerOrder(order));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录", 401);
-    const message = error instanceof Error ? error.message : "接单失败";
-    if (message.includes("订单") || message.includes("接单") || message.includes("上线")) return fail(message);
+    if (error instanceof Response) return fail("Unauthorized", 401);
+    const message = error instanceof Error ? error.message : "Failed to accept order";
+    if (message.includes("order") || message.includes("accept") || message.includes("online")) return fail(message);
     return handleRouteError(error);
   }
 }

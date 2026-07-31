@@ -66,13 +66,13 @@ export async function createWithdrawalRequest(input: {
         where: { id: input.workerId },
         select: { binanceUserId: true },
       });
-      if (!worker) throw new Error("接单方不存在");
-      if (!worker.binanceUserId) throw new Error("请先绑定 Binance 用户 ID 后再申请提现");
+      if (!worker) throw new Error("Worker not found");
+      if (!worker.binanceUserId) throw new Error("Please bind Binance user ID before requesting withdrawal");
 
       const summary = await getWorkerWalletSummary(input.workerId, tx);
       const amount = Number(input.amount);
       if (summary.availableBalance < amount) {
-        throw new Error("可提现余额不足");
+        throw new Error("Insufficient available balance for withdrawal");
       }
 
       return tx.workerWithdrawalRequest.create({

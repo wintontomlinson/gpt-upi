@@ -17,7 +17,7 @@ export async function POST(request: Request, context: { params: Promise<{ worker
     const { workerId } = await context.params;
     const body = await request.json().catch(() => ({}));
     const unitPrice = parseUnitPrice(body.unitPrice);
-    if (unitPrice === null) return fail("单价必须是大于或等于 0 的数字");
+    if (unitPrice === null) return fail("Unit price must be a number >= 0");
 
     const updated = await prisma.worker.update({
       where: { id: workerId },
@@ -42,8 +42,8 @@ export async function POST(request: Request, context: { params: Promise<{ worker
     });
     return ok(serializeWorker(updated));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
-    if (error && typeof error === "object" && "code" in error && error.code === "P2025") return fail("接单账号不存在", 404);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") return fail("Worker account not found", 404);
     return handleRouteError(error);
   }
 }

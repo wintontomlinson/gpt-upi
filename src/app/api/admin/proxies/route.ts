@@ -49,7 +49,7 @@ export async function GET(request: Request) {
       selection,
     });
   } catch (error) {
-    if (error instanceof Response) return fail("未登录", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }
@@ -63,11 +63,11 @@ export async function POST(request: Request) {
 
     if (action === "add") {
       const proxyUrl = String(body.proxyUrl || "").trim();
-      if (!proxyUrl) return fail("请输入代理地址", 400);
+      if (!proxyUrl) return fail("Proxy URL is required", 400);
       await addEditableUpstreamProxy(pool, proxyUrl);
     } else if (action === "delete") {
       const proxyId = String(body.proxyId || "").trim();
-      if (!proxyId) return fail("缺少代理 ID", 400);
+      if (!proxyId) return fail("Proxy ID is required", 400);
       await deleteEditableUpstreamProxy(pool, proxyId);
     } else if (action === "replace") {
       await setEditableUpstreamProxyUrls(pool, String(body.proxyList || ""));
@@ -81,8 +81,8 @@ export async function POST(request: Request) {
       selection,
     });
   } catch (error) {
-    if (error instanceof Response) return fail("未登录", 401);
-    const message = error instanceof Error ? error.message : "保存代理选择失败";
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
+    const message = error instanceof Error ? error.message : "Failed to save proxy selection";
     return fail(message, 400);
   }
 }

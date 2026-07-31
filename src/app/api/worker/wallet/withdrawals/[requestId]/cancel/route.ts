@@ -40,9 +40,9 @@ export async function POST(_request: Request, context: { params: Promise<{ reque
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     );
 
-    if (result.type === "notFound") return fail("提现申请不存在", 404);
-    if (result.type === "forbidden") return fail("只能取消自己的提现申请", 403);
-    if (result.type === "notPending") return fail("该提现申请已处理，无法取消");
+    if (result.type === "notFound") return fail("Withdrawal request not found", 404);
+    if (result.type === "forbidden") return fail("Can only cancel your own withdrawal request", 403);
+    if (result.type === "notPending") return fail("This withdrawal request has already been processed and cannot be cancelled");
     return ok(serializeWorkerWithdrawalRequest(result.withdrawal));
   } catch (error) {
     if (error instanceof Response) return fail("Unauthorized", 401);

@@ -9,7 +9,7 @@ export async function POST() {
   try {
     const worker = await requireWorkerSession();
     const activeCount = await prisma.workerActiveOrder.count({ where: { workerId: worker.id } });
-    if (activeCount > 0) return fail("当前有进行中的订单，完成后才能下线");
+    if (activeCount > 0) return fail("You have active orders. Complete them before going offline");
 
     const updated = await prisma.worker.update({
       where: { id: worker.id },
@@ -34,7 +34,7 @@ export async function POST() {
     });
     return ok(serializeWorker(updated));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录", 401);
+    if (error instanceof Response) return fail("Unauthorized", 401);
     return handleRouteError(error);
   }
 }

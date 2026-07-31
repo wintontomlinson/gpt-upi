@@ -11,11 +11,11 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     const user = await getPublicUserSession();
-    if (!user) return fail("请先登录 Telegram 账户，再发布扫码订单。", 401);
+    if (!user) return fail("Please login first before creating a scan order.", 401);
 
     const body = (await request.json().catch(() => ({}))) as { scanOrderCreateToken?: string };
     const token = String(body.scanOrderCreateToken || "").trim();
-    if (!token) return fail("缺少二维码发布凭证，请重新提取。", 400);
+    if (!token) return fail("Missing QR publish token. Please extract again.", 400);
 
     const { order, jobId } = await createPublicScanOrderFromTicket({
       token,
@@ -26,14 +26,14 @@ export async function POST(request: Request) {
 
     return ok(serializeWorkerOrder(order), { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "发布扫码订单失败";
+    const message = error instanceof Error ? error.message : "Failed to create scan order";
     if (
-      message.includes("余额不足") ||
-      message.includes("二维码") ||
-      message.includes("发布") ||
-      message.includes("凭证") ||
-      message.includes("账号") ||
-      message.includes("过期")
+      message.includes("Insufficient balance") ||
+      message.includes("QR code") ||
+      message.includes("publish") ||
+      message.includes("token") ||
+      message.includes("account") ||
+      message.includes("expired")
     ) {
       return fail(message);
     }
@@ -71,7 +71,7 @@ export async function DELETE(request: Request) {
     return ok(serializeWorkerOrder(result.order));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Cancel scan order failed";
-    if (message.includes("接取") || message.includes("取消") || message.toLowerCase().includes("cancel")) {
+    if (message.includes("accepted") || message.includes("cancel") || message.toLowerCase().includes("cancel")) {
       return fail(message);
     }
     return handleRouteError(error);

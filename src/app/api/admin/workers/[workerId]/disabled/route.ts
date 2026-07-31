@@ -16,7 +16,7 @@ export async function POST(request: Request, context: { params: Promise<{ worker
         where: { workerId },
         select: { order: { select: { orderNo: true } } },
       });
-      if (active) return fail(`该接单方有进行中订单 ${active.order.orderNo}，完成或释放后才能停用`);
+      if (active) return fail(`This worker has an active order ${active.order.orderNo}. Complete or release it before disabling`);
     }
 
     const updated = await prisma.worker.update({
@@ -44,8 +44,8 @@ export async function POST(request: Request, context: { params: Promise<{ worker
     });
     return ok(serializeWorker(updated));
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
-    if (error && typeof error === "object" && "code" in error && error.code === "P2025") return fail("接单账号不存在", 404);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") return fail("Worker account not found", 404);
     return handleRouteError(error);
   }
 }

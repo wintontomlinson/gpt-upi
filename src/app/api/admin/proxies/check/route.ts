@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     if (typeof body.proxyId === "string" && body.proxyId.trim()) {
       const proxies = await getConfiguredUpstreamProxies(pool);
       const target = proxies.find((proxy) => proxy.id === body.proxyId);
-      if (!target) return fail("代理不存在", 404);
+      if (!target) return fail("Proxy not found", 404);
 
       const result = await checkUpstreamProxy(target, { timeoutMs: 15_000 });
       return ok({
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     if (typeof body.proxyIndex === "number" && Number.isFinite(body.proxyIndex)) {
       const proxies = await getConfiguredUpstreamProxies(pool);
       const target = proxies[body.proxyIndex];
-      if (!target) return fail("代理不存在", 404);
+      if (!target) return fail("Proxy not found", 404);
 
       const result = await checkUpstreamProxy(target, { timeoutMs: 15_000 });
       return ok({
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     const result = await checkConfiguredUpstreamProxies({ timeoutMs: 15_000, pool });
     return ok(result);
   } catch (error) {
-    if (error instanceof Response) return fail("未登录管理员", 401);
+    if (error instanceof Response) return fail("Admin not authenticated", 401);
     return handleRouteError(error);
   }
 }

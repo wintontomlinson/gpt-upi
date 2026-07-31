@@ -566,3 +566,15 @@ model WorkerOrderRecord {
   @@index([settledAt])
   @@map("worker_order_records")
 }
+
+model PublicUserAccount {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  isDisabled   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([username])
+  @@map("public_user_accounts")
+}

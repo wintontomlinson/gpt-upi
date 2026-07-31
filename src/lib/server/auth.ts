@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { SignJWT, jwtVerify } from "jose";
 import { prisma } from "@/lib/server/prisma";
 import { getPublicUserPremiumStatus } from "@/lib/server/public-user-premium";
-import { normalizeTelegramUsername } from "@/lib/server/telegram-login";
 
 const WORKER_COOKIE_NAME = "gpt_upi_worker";
 const ADMIN_COOKIE_NAME = "gpt_upi_admin";
@@ -184,14 +183,12 @@ export async function getPublicUserSession() {
   async function getLocalTestPublicUserSession() {
     if (process.env.GPT_UPI_LOCAL_TEST_ENV !== "1") return null;
     const telegramUserId = process.env.LOCAL_TEST_PUBLIC_USER_ID || process.env.TELEGRAM_ADMIN_ID || LOCAL_TEST_PUBLIC_USER_ID;
-    const telegramUsername = normalizeTelegramUsername(
-      process.env.LOCAL_TEST_PUBLIC_USER_USERNAME || process.env.TELEGRAM_ADMIN_USERNAME || LOCAL_TEST_PUBLIC_USER_USERNAME
-    );
+    const telegramUsername = (process.env.LOCAL_TEST_PUBLIC_USER_USERNAME || process.env.TELEGRAM_ADMIN_USERNAME || LOCAL_TEST_PUBLIC_USER_USERNAME)?.trim().replace(/^@/, "").toLowerCase() || null;
     const premium = await getPublicUserPremiumStatus({ telegramUserId, telegramUsername });
     return {
       telegramUserId,
       telegramUsername,
-      displayName: telegramUsername ? `@${telegramUsername}` : `TG ${telegramUserId}`,
+      displayName: telegramUsername ? `@${telegramUsername}` : `User ${telegramUserId}`,
       isPremium: premium.isPremium,
       premiumUntil: premium.premiumUntil,
       premiumSource: premium.premiumSource,

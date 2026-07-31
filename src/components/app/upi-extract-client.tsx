@@ -1645,36 +1645,9 @@ export function UpiExtractClient({ mockMode = false, mockSeedAt }: { mockMode?: 
   }, [taskPage, taskPagination]);
 
   const startPublicLogin = useCallback(async (openBot = false) => {
-    let popup: Window | null = null;
-    if (openBot && typeof window !== "undefined") {
-      popup = window.open("about:blank", "_blank");
-    }
-
-    try {
-      setLoginLoading(true);
-      setLoginOpen(true);
-      const challenge = await apiFetch<PublicLoginChallenge>("/api/tg-login/challenge", {
-        method: "POST",
-        body: JSON.stringify({ purpose: "user" }),
-      });
-      setLoginChallenge(challenge);
-      setLoginStatus(challenge.status);
-
-      if (openBot) {
-        const link = makeTelegramLoginLink(challenge.code);
-        if (popup) {
-          popup.location.href = link;
-        } else {
-          window.open(link, "_blank", "noopener,noreferrer");
-        }
-      }
-    } catch (error) {
-      popup?.close();
-      toast.error(error instanceof Error ? error.message : t.loginFailed);
-    } finally {
-      setLoginLoading(false);
-    }
-  }, [t.loginFailed]);
+    // Redirect to login page instead of Telegram challenge
+    window.location.href = "/login";
+  }, []);
 
   const logoutPublicUser = useCallback(async () => {
     try {

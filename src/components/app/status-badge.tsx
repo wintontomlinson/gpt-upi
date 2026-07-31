@@ -7,24 +7,24 @@ type BadgeLanguage = "zh" | "en";
 const orderLabels: Record<BadgeLanguage, Record<"worker" | "customer", Record<OrderStatus, string>>> = {
   zh: {
     worker: {
-      PENDING: "等待接单",
-      ASSIGNED: "处理中",
-      CHECKING: "检测中",
-      NEED_REUPLOAD: "需重传",
-      COMPLETED: "已完成",
-      FAILED: "失败",
-      CANCELLED: "已取消",
-      EXPIRED: "已超时",
+      PENDING: "Waiting",
+      ASSIGNED: "Processing",
+      CHECKING: "Checking",
+      NEED_REUPLOAD: "Reupload",
+      COMPLETED: "Completed",
+      FAILED: "Failed",
+      CANCELLED: "Cancelled",
+      EXPIRED: "Expired",
     },
     customer: {
-      PENDING: "等待处理",
-      ASSIGNED: "处理中",
-      CHECKING: "检测中",
-      NEED_REUPLOAD: "需重传",
-      COMPLETED: "已完成",
-      FAILED: "失败",
-      CANCELLED: "已取消",
-      EXPIRED: "已超时",
+      PENDING: "Waiting",
+      ASSIGNED: "Processing",
+      CHECKING: "Checking",
+      NEED_REUPLOAD: "Reupload",
+      COMPLETED: "Completed",
+      FAILED: "Failed",
+      CANCELLED: "Cancelled",
+      EXPIRED: "Expired",
     },
   },
   en: {
@@ -52,7 +52,7 @@ const orderLabels: Record<BadgeLanguage, Record<"worker" | "customer", Record<Or
 };
 
 const workerLabels: Record<BadgeLanguage, Record<WorkerStatus, string>> = {
-  zh: { ONLINE: "在线", OFFLINE: "离线" },
+  zh: { ONLINE: "Online", OFFLINE: "Offline" },
   en: { ONLINE: "Online", OFFLINE: "Offline" },
 };
 
@@ -70,7 +70,7 @@ const orderTone: Record<OrderStatus, string> = {
 export function OrderStatusBadge({
   status,
   audience = "worker",
-  language = "zh",
+  language = "en",
 }: {
   status: OrderStatus;
   audience?: "customer" | "worker";
@@ -85,7 +85,7 @@ export function OrderStatusBadge({
   );
 }
 
-export function WorkerStatusBadge({ status, language = "zh" }: { status: WorkerStatus; language?: BadgeLanguage }) {
+export function WorkerStatusBadge({ status, language = "en" }: { status: WorkerStatus; language?: BadgeLanguage }) {
   const online = status === "ONLINE";
   return (
     <Badge variant="secondary" className="gap-2 rounded-full px-2.5">
@@ -95,6 +95,6 @@ export function WorkerStatusBadge({ status, language = "zh" }: { status: WorkerS
   );
 }
 
-export function orderStatusText(status: OrderStatus, language: BadgeLanguage = "zh", audience: "customer" | "worker" = "worker") {
+export function orderStatusText(status: OrderStatus, language: BadgeLanguage = "en", audience: "customer" | "worker" = "worker") {
   return orderLabels[language][audience][status];
 }

@@ -103,9 +103,9 @@ export function AdminUpiExtractClient() {
         public: concurrencyDirty.public ? current.public : String(channelMaxConcurrent(next, "public")),
         premium: concurrencyDirty.premium ? current.premium : String(channelMaxConcurrent(next, "premium")),
       }));
-      if (!silent) toast.success("提取任务列表已刷新");
+      if (!silent) toast.success("Extraction task list refreshed");
     } catch (error) {
-      if (!silent) toast.error(error instanceof Error ? error.message : "刷新提取任务失败");
+      if (!silent) toast.error(error instanceof Error ? error.message : "Failed to refresh extraction tasks");
     } finally {
       setLoading(false);
     }
@@ -119,13 +119,13 @@ export function AdminUpiExtractClient() {
         body: JSON.stringify({ action, jobId, channel }),
       });
       setState(next);
-      if (action === "pause") toast.success(`${channelLabel(channel)}提取入口已暂停`);
-      else if (action === "resume") toast.success(`${channelLabel(channel)}提取入口已恢复`);
-      else if (action === "stopAll") toast.success(`已将 ${next.changed ?? 0} 个任务转为等待中`);
-      else if (action === "stop") toast.success("任务已转为等待中");
-      else toast.success("任务已启动");
+      if (action === "pause") toast.success(`${channelLabel(channel)} extraction paused`);
+      else if (action === "resume") toast.success(`${channelLabel(channel)} extraction resumed`);
+      else if (action === "stopAll") toast.success(`Moved ${next.changed ?? 0} task(s) to queued`);
+      else if (action === "stop") toast.success("Task moved to queued");
+      else toast.success("Task started");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "操作失败");
+      toast.error(error instanceof Error ? error.message : "Operation failed");
     } finally {
       setActing(null);
     }
@@ -140,9 +140,9 @@ export function AdminUpiExtractClient() {
       });
       setState(next);
       setConcurrencyDirty((current) => ({ ...current, [channel]: false }));
-      toast.success(`${channelLabel(channel)}并发上限已保存`);
+      toast.success(`${channelLabel(channel)} concurrency limit saved`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "保存并发上限失败");
+      toast.error(error instanceof Error ? error.message : "Failed to save concurrency limit");
     } finally {
       setActing(null);
     }
@@ -163,18 +163,18 @@ export function AdminUpiExtractClient() {
   const isBusy = loading || Boolean(acting);
 
   return (
-    <AppFrame audience="admin" title="UPI 提取管理" subtitle="查看公益提取任务，暂停入口，或把正在处理的任务转回等待中。" onRefresh={() => refresh()}>
+    <AppFrame audience="admin" title="UPI Extraction Admin" subtitle="View extraction tasks, pause intake, or move running tasks back to queued." onRefresh={() => refresh()}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <Link href="/admin" className={buttonVariants({ variant: "outline" })}>
-          <ArrowLeftIcon data-icon="inline-start" />返回管理首页
+          <ArrowLeftIcon data-icon="inline-start" />Back to admin home
         </Link>
         <div className="flex flex-wrap gap-2">
           <div className="relative w-full sm:w-72">
             <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="搜索任务 ID / 状态 / 错误" className="pl-9" />
+            <Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Search task ID / status / error" className="pl-9" />
           </div>
           <Button variant="outline" onClick={() => refresh()} disabled={isBusy}>
-            <RefreshCwIcon data-icon="inline-start" />刷新
+            <RefreshCwIcon data-icon="inline-start" />Refresh
           </Button>
           <ChannelPauseButton
             channel="public"
@@ -191,23 +191,23 @@ export function AdminUpiExtractClient() {
             onControl={control}
           />
           <Button variant="outline" onClick={() => control("stopAll")} disabled={isBusy}>
-            <RotateCcwIcon data-icon="inline-start" />一键停止并转等待
+            <RotateCcwIcon data-icon="inline-start" />Stop all and move to queued
           </Button>
         </div>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-5">
-        <MetricCard title="入口状态" value={pauseSummary(state)} description="公共和 Premium 可单独暂停；已转等待的任务可手动启动。" icon={isAnyChannelPaused(state) ? ShieldAlertIcon : CheckCircle2Icon} tone={isAnyChannelPaused(state) ? "warning" : "success"} />
-        <MetricCard title="正在提取" value={state?.activeExtractionCount ?? 0} description={`公共 ${state?.activeExtractionCountByChannel?.public ?? 0}/${channelMaxConcurrent(state, "public")} / Premium ${state?.activeExtractionCountByChannel?.premium ?? 0}/${channelMaxConcurrent(state, "premium")}`} icon={ActivityIcon} tone="info" />
-        <MetricCard title="等待中" value={state?.queuedCount ?? counts.queued} description={`公共 ${state?.queuedCountByChannel?.public ?? 0} / Premium ${state?.queuedCountByChannel?.premium ?? 0}`} icon={TimerIcon} tone="warning" />
-        <MetricCard title="成功 / 失败" value={`${counts.completed} / ${counts.failed}`} description="按全部历史活动统计" icon={CheckCircle2Icon} tone="brand" />
-        <MetricCard title="暂存中" value={state?.storageActiveCount ?? 0} description="当前仍有效的暂存 ID 数量" icon={RotateCcwIcon} tone="brand" />
+        <MetricCard title="Intake Status" value={pauseSummary(state)} description="Public and Premium can be paused independently; queued tasks can be started manually." icon={isAnyChannelPaused(state) ? ShieldAlertIcon : CheckCircle2Icon} tone={isAnyChannelPaused(state) ? "warning" : "success"} />
+        <MetricCard title="Active" value={state?.activeExtractionCount ?? 0} description={`Public ${state?.activeExtractionCountByChannel?.public ?? 0}/${channelMaxConcurrent(state, "public")} / Premium ${state?.activeExtractionCountByChannel?.premium ?? 0}/${channelMaxConcurrent(state, "premium")}`} icon={ActivityIcon} tone="info" />
+        <MetricCard title="Queued" value={state?.queuedCount ?? counts.queued} description={`Public ${state?.queuedCountByChannel?.public ?? 0} / Premium ${state?.queuedCountByChannel?.premium ?? 0}`} icon={TimerIcon} tone="warning" />
+        <MetricCard title="Success / Failed" value={`${counts.completed} / ${counts.failed}`} description="All-time activity stats" icon={CheckCircle2Icon} tone="brand" />
+        <MetricCard title="In Storage" value={state?.storageActiveCount ?? 0} description="Currently active storage IDs" icon={RotateCcwIcon} tone="brand" />
       </div>
 
       <Card className="mt-4 rounded-3xl bg-background shadow-sm">
         <CardHeader>
-          <CardTitle>通道并发设置</CardTitle>
-          <CardDescription>分别设置公共通道和 Premium 通道同时提取的任务数量；保存后立即生效，已在运行的任务不会被中断。</CardDescription>
+          <CardTitle>Channel Concurrency Settings</CardTitle>
+          <CardDescription>Set concurrent extraction tasks for public and premium channels. Changes take effect immediately; running tasks are not interrupted.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-2">
@@ -219,10 +219,10 @@ export function AdminUpiExtractClient() {
                 <div key={channel} className="rounded-3xl border border-border p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <div className="font-semibold">{channelLabel(channel)}通道</div>
-                      <div className="mt-1 text-xs text-muted-foreground">当前运行 {active}，等待 {queued}</div>
+                      <div className="font-semibold">{channelLabel(channel)} channel</div>
+                      <div className="mt-1 text-xs text-muted-foreground">Running {active}, queued {queued}</div>
                     </div>
-                    <Badge variant={channel === "premium" ? "default" : "outline"}>当前上限 {channelMaxConcurrent(state, channel)}</Badge>
+                    <Badge variant={channel === "premium" ? "default" : "outline"}>Limit {channelMaxConcurrent(state, channel)}</Badge>
                   </div>
                   <div className="mt-4 flex gap-2">
                     <Input
@@ -241,7 +241,7 @@ export function AdminUpiExtractClient() {
                       disabled={isBusy || isSaving || !concurrencyDirty[channel]}
                       className="rounded-xl"
                     >
-                      {isSaving ? "保存中" : "保存"}
+                      {isSaving ? "Saving" : "Save"}
                     </Button>
                   </div>
                 </div>
@@ -253,14 +253,14 @@ export function AdminUpiExtractClient() {
 
       <Card className="mt-4 rounded-3xl bg-background shadow-sm">
         <CardHeader>
-          <CardTitle>实时提取任务</CardTitle>
+          <CardTitle>Live Extraction Tasks</CardTitle>
           <CardDescription>
-            这里只显示当前进程内仍可控制的任务；停止不会把任务记为失败，而是转回等待中。重启服务后，历史记录仍可查看，但临时数据不会恢复。
+            Only tasks controllable within the current process are shown. Stopping a task moves it to queued, not failed. After service restart, history is preserved but ephemeral data is lost.
           </CardDescription>
           <CardAction>
             <div className="flex flex-wrap gap-2">
-              <Badge variant={state?.pausedByChannel?.public ? "secondary" : "default"}>公共{state?.pausedByChannel?.public ? "暂停" : "运行"}</Badge>
-              <Badge variant={state?.pausedByChannel?.premium ? "secondary" : "default"}>Premium{state?.pausedByChannel?.premium ? "暂停" : "运行"}</Badge>
+              <Badge variant={state?.pausedByChannel?.public ? "secondary" : "default"}>Public {state?.pausedByChannel?.public ? "Paused" : "Running"}</Badge>
+              <Badge variant={state?.pausedByChannel?.premium ? "secondary" : "default"}>Premium {state?.pausedByChannel?.premium ? "Paused" : "Running"}</Badge>
             </div>
           </CardAction>
         </CardHeader>
@@ -269,15 +269,15 @@ export function AdminUpiExtractClient() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>任务</TableHead>
-                  <TableHead>通道</TableHead>
-                  <TableHead>来源</TableHead>
-                  <TableHead>状态</TableHead>
-                  <TableHead>进度</TableHead>
-                  <TableHead>创建</TableHead>
-                  <TableHead>更新</TableHead>
-                  <TableHead>错误</TableHead>
-                  <TableHead className="text-right">操作</TableHead>
+                  <TableHead>Task</TableHead>
+                  <TableHead>Channel</TableHead>
+                  <TableHead>Source</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Updated</TableHead>
+                  <TableHead>Error</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -285,7 +285,7 @@ export function AdminUpiExtractClient() {
                   <TableRow key={job.jobId}>
                     <TableCell>
                       <div className="font-mono text-xs">{shortJobId(job.jobId)}</div>
-                      <div className="mt-1 text-xs text-muted-foreground">{job.hasPayload ? "可恢复" : "无临时数据"}{job.hasResult ? " / 已有结果" : ""}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">{job.hasPayload ? "Resumable" : "No ephemeral data"}{job.hasResult ? " / Has result" : ""}</div>
                     </TableCell>
                     <TableCell><ChannelBadge channel={job.channel} /></TableCell>
                     <TableCell><SourceBadge source={job.source} /></TableCell>
@@ -310,17 +310,17 @@ export function AdminUpiExtractClient() {
                     <TableCell className="text-right">
                       <div className="flex flex-wrap justify-end gap-2">
                         <Button variant="outline" size="sm" onClick={() => control("start", job.jobId)} disabled={isBusy || !job.canStart}>
-                          <PlayCircleIcon data-icon="inline-start" />启动
+                          <PlayCircleIcon data-icon="inline-start" />Start
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => control("stop", job.jobId)} disabled={isBusy || !job.canStop}>
-                          <PauseCircleIcon data-icon="inline-start" />停止
+                          <PauseCircleIcon data-icon="inline-start" />Stop
                         </Button>
                       </div>
                     </TableCell>
                   </TableRow>
                 ))}
                 {(!state?.jobs || state.jobs.length === 0) && (
-                  <TableRow><TableCell colSpan={9} className="h-28 text-center text-muted-foreground">当前没有可控制的实时任务</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="h-28 text-center text-muted-foreground">No controllable live tasks at this time</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -331,9 +331,9 @@ export function AdminUpiExtractClient() {
 
       <Card className="mt-4 rounded-3xl bg-background shadow-sm">
         <CardHeader>
-          <CardTitle>最近提取记录</CardTitle>
-          <CardDescription>用于核对热力图状态，列表不包含用户凭证和二维码内容。</CardDescription>
-          <CardAction>{recentItems.length} 条</CardAction>
+          <CardTitle>Recent Extraction Records</CardTitle>
+          <CardDescription>For verifying heatmap status; this list does not include credentials or QR content.</CardDescription>
+          <CardAction>{recentItems.length}  records</CardAction>
         </CardHeader>
         <CardContent>
           <div className="overflow-hidden rounded-3xl border border-border">
@@ -341,13 +341,13 @@ export function AdminUpiExtractClient() {
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>任务</TableHead>
-                  <TableHead>通道</TableHead>
-                  <TableHead>来源</TableHead>
-                  <TableHead>状态</TableHead>
-                  <TableHead>创建</TableHead>
-                  <TableHead>更新</TableHead>
-                  <TableHead className="text-right">操作</TableHead>
+                  <TableHead>Task</TableHead>
+                  <TableHead>Channel</TableHead>
+                  <TableHead>Source</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Updated</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -370,9 +370,9 @@ export function AdminUpiExtractClient() {
                             size="sm"
                             onClick={() => control("start", item.jobId)}
                             disabled={isBusy || !canStart}
-                            title={canStart ? "启动该等待任务" : "该记录没有可恢复的临时数据，无法启动"}
+                            title={canStart ? "Start this queued task" : "This record has no resumable data and cannot be started"}
                           >
-                            <PlayCircleIcon data-icon="inline-start" />启动
+                            <PlayCircleIcon data-icon="inline-start" />Start
                           </Button>
                         ) : (
                           <span className="text-sm text-muted-foreground">-</span>
@@ -381,7 +381,7 @@ export function AdminUpiExtractClient() {
                     </TableRow>
                   );
                 })}
-                {recentItems.length === 0 && <TableRow><TableCell colSpan={8} className="h-28 text-center text-muted-foreground">暂无提取记录</TableCell></TableRow>}
+                {recentItems.length === 0 && <TableRow><TableCell colSpan={8} className="h-28 text-center text-muted-foreground">No extraction records</TableCell></TableRow>}
               </TableBody>
             </Table>
           </div>
@@ -409,23 +409,23 @@ function ChannelPauseButton({
   const isActing = acting === `pause:${channel}` || acting === `resume:${channel}`;
   return paused ? (
     <Button onClick={() => onControl("resume", undefined, channel)} disabled={disabled || isActing}>
-      <PlayCircleIcon data-icon="inline-start" />恢复{label}
+      <PlayCircleIcon data-icon="inline-start" />Resume {label}
     </Button>
   ) : (
     <Button variant="outline" onClick={() => onControl("pause", undefined, channel)} disabled={disabled || isActing}>
-      <PauseCircleIcon data-icon="inline-start" />暂停{label}
+      <PauseCircleIcon data-icon="inline-start" />Pause {label}
     </Button>
   );
 }
 
 function ChannelBadge({ channel }: { channel?: ExtractChannel }) {
-  return <Badge variant={channel === "premium" ? "default" : "outline"}>{channel === "premium" ? "Premium" : "公共"}</Badge>;
+  return <Badge variant={channel === "premium" ? "default" : "outline"}>{channel === "premium" ? "Premium" : "Public"}</Badge>;
 }
 
 function channelLabel(channel?: ExtractChannel) {
   if (channel === "premium") return "Premium";
-  if (channel === "public") return "公共";
-  return "公益";
+  if (channel === "public") return "Public";
+  return "Premium";
 }
 
 function channelMaxConcurrent(state: AdminExtractState | null, channel: ExtractChannel) {
@@ -439,24 +439,24 @@ function isAnyChannelPaused(state: AdminExtractState | null) {
 function pauseSummary(state: AdminExtractState | null) {
   const publicPaused = Boolean(state?.pausedByChannel?.public ?? state?.paused);
   const premiumPaused = Boolean(state?.pausedByChannel?.premium);
-  if (publicPaused && premiumPaused) return "全部暂停";
-  if (publicPaused) return "公共暂停";
-  if (premiumPaused) return "Premium 暂停";
-  return "运行中";
+  if (publicPaused && premiumPaused) return "All paused";
+  if (publicPaused) return "Public paused";
+  if (premiumPaused) return "Premium paused";
+  return "Running";
 }
 
 function StatusBadge({ status }: { status: ExtractStatus }) {
   const meta: Record<ExtractStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    completed: { label: "成功", variant: "default" },
-    queued: { label: "等待中", variant: "secondary" },
-    running: { label: "提取中", variant: "outline" },
-    failed: { label: "失败", variant: "destructive" },
+    completed: { label: "Success", variant: "default" },
+    queued: { label: "Queued", variant: "secondary" },
+    running: { label: "Extracting", variant: "outline" },
+    failed: { label: "Failed", variant: "destructive" },
   };
   return <Badge variant={meta[status].variant}>{meta[status].label}</Badge>;
 }
 
 function SourceBadge({ source }: { source: ExtractSource }) {
-  return <Badge variant={source === "storage" ? "secondary" : "outline"}>{source === "storage" ? "暂存" : "直接提交"}</Badge>;
+  return <Badge variant={source === "storage" ? "secondary" : "outline"}>{source === "storage" ? "Storage" : "Direct"}</Badge>;
 }
 
 function shortJobId(jobId: string) {
@@ -466,16 +466,16 @@ function shortJobId(jobId: string) {
 
 function stageText(stage?: string) {
   const map: Record<string, string> = {
-    queued: "准备任务",
-    validating: "验证凭证",
-    checkout: "创建 checkout",
-    stripe_init: "初始化 Stripe",
-    stripe_confirm: "确认支付方式",
-    approval: "Approve 阶段",
-    waiting_qr: "等待二维码",
-    hydrating: "读取二维码",
-    rendering_qr: "渲染二维码",
-    completed: "完成",
+    queued: "Preparing",
+    validating: "Validating",
+    checkout: "Creating checkout",
+    stripe_init: "Initializing Stripe",
+    stripe_confirm: "Confirming payment",
+    approval: "Approve stage",
+    waiting_qr: "Waiting for QR",
+    hydrating: "Parsing QR data",
+    rendering_qr: "Rendering QR",
+    completed: "Completed",
   };
-  return map[stage || "queued"] || stage || "准备任务";
+  return map[stage || "queued"] || stage || "Preparing";
 }

@@ -18,7 +18,7 @@ export function AdminListPagination({
   if (!pagination || pagination.totalPages <= 1 && pagination.total <= pagination.pageSize) {
     return pagination ? (
       <div className={cn("flex items-center justify-end text-xs text-muted-foreground", className)}>
-        共 {pagination.total} 条
+        {pagination.total} total
       </div>
     ) : null;
   }
@@ -26,7 +26,7 @@ export function AdminListPagination({
   return (
     <div className={cn("flex flex-wrap items-center justify-between gap-3 text-sm", className)}>
       <div className="text-xs text-muted-foreground">
-        第 {pagination.page} / {pagination.totalPages} 页，共 {pagination.total} 条，每页 {pagination.pageSize} 条
+        Page {pagination.page} / {pagination.totalPages}, {pagination.total} total, {pagination.pageSize} per page
       </div>
       <div className="flex items-center gap-2">
         <Button
@@ -36,7 +36,7 @@ export function AdminListPagination({
           disabled={loading || !pagination.hasPrev}
           onClick={() => onPageChange(Math.max(1, pagination.page - 1))}
         >
-          上一页
+          Previous
         </Button>
         <Button
           type="button"
@@ -45,7 +45,7 @@ export function AdminListPagination({
           disabled={loading || !pagination.hasNext}
           onClick={() => onPageChange(Math.min(pagination.totalPages, pagination.page + 1))}
         >
-          下一页
+          Next
         </Button>
       </div>
     </div>

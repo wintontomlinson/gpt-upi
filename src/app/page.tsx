@@ -21,10 +21,10 @@ function MaintenancePage() {
           Maintenance
         </p>
         <h1 className="text-3xl font-black tracking-tight md:text-4xl">
-          系统维护升级中
+          System Maintenance
         </h1>
         <p className="mt-4 text-base leading-7 text-slate-600">
-          我们正在进行内部调整和稳定性测试，提取服务暂时关闭。请稍后再回来查看。
+          We are performing internal adjustments and stability testing. The extraction service is temporarily closed. Please check back later.
         </p>
         <div className="mt-7 rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3 text-sm font-medium text-orange-700">
           We are tuning the service. Please check back later.

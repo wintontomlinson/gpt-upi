@@ -46,30 +46,30 @@ type Copy = {
 
 const COPY: Record<AppLanguage, Copy> = {
   zh: {
-    title: "提现申请记录",
-    subtitle: "按时间倒序查看提现申请，支持状态、Binance UID、备注和申请 ID 搜索。",
-    refresh: "刷新",
-    refreshed: "提现记录已刷新",
-    refreshFailed: "刷新失败",
-    back: "返回工作台",
-    searchPlaceholder: "搜索状态 / Binance UID / 备注 / 申请 ID",
-    amount: "金额",
-    status: "状态",
+    title: "Withdrawal requests",
+    subtitle: "Browse withdrawal requests by time. Search status, Binance UID, notes, or request ID.",
+    refresh: "Refresh",
+    refreshed: "Withdrawal requests refreshed",
+    refreshFailed: "Refresh failed",
+    back: "Back to workbench",
+    searchPlaceholder: "Search status / Binance UID / note / request ID",
+    amount: "Amount",
+    status: "Status",
     binanceUid: "Binance UID",
-    requestedAt: "申请时间",
-    processedAt: "处理时间",
-    note: "备注",
-    action: "操作",
-    cancel: "取消申请",
-    cancelling: "取消中...",
-    cancelSuccess: "提现申请已取消，可提余额已恢复",
-    cancelFailed: "取消提现失败",
-    empty: "暂无提现申请",
+    requestedAt: "Requested at",
+    processedAt: "Processed at",
+    note: "Note",
+    action: "Action",
+    cancel: "Cancel",
+    cancelling: "Cancelling...",
+    cancelSuccess: "Withdrawal request cancelled. Available balance restored.",
+    cancelFailed: "Failed to cancel withdrawal",
+    empty: "No withdrawal requests yet",
     switchLanguage: "EN",
-    pageSummary: (page, totalPages, total, pageSize) => `第 ${page} / ${totalPages} 页，共 ${total} 条，每页 ${pageSize} 条`,
-    totalSummary: (total) => `共 ${total} 条`,
-    prevPage: "上一页",
-    nextPage: "下一页",
+    pageSummary: (page, totalPages, total, pageSize) => `Page ${page} / ${totalPages}, ${total} total, ${pageSize} per page`,
+    totalSummary: (total) => `${total} total`,
+    prevPage: "Previous",
+    nextPage: "Next",
   },
   en: {
     title: "Withdrawal requests",
@@ -91,7 +91,7 @@ const COPY: Record<AppLanguage, Copy> = {
     cancelSuccess: "Withdrawal request cancelled. Available balance restored.",
     cancelFailed: "Failed to cancel withdrawal",
     empty: "No withdrawal requests yet",
-    switchLanguage: "中文",
+    switchLanguage: "EN",
     pageSummary: (page, totalPages, total, pageSize) => `Page ${page} / ${totalPages}, ${total} total, ${pageSize} per page`,
     totalSummary: (total) => `${total} total`,
     prevPage: "Previous",
@@ -101,10 +101,10 @@ const COPY: Record<AppLanguage, Copy> = {
 
 const STATUS_TEXT: Record<AppLanguage, Record<PublicWorkerWithdrawalRequest["status"], string>> = {
   zh: {
-    PENDING: "待处理",
-    PAID: "已打款",
-    REJECTED: "已拒绝",
-    CANCELLED: "已取消",
+    PENDING: "Pending",
+    PAID: "Paid",
+    REJECTED: "Rejected",
+    CANCELLED: "Cancelled",
   },
   en: {
     PENDING: "Pending",
@@ -170,7 +170,7 @@ export function WorkerWithdrawalsClient() {
       setUnauthorized(false);
       if (!silent) toast.success(COPY[language].refreshed);
     } catch (error) {
-      if (error instanceof Error && (error.message.includes("未登录") || error.message.toLowerCase().includes("unauthorized"))) {
+      if (error instanceof Error && (error.message.includes("unauthorized") || error.message.toLowerCase().includes("unauthorized"))) {
         setUnauthorized(true);
         return;
       }

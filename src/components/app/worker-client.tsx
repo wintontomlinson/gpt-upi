@@ -504,7 +504,7 @@ export function WorkerClient() {
       if (meReadyRef.current && newActiveOrder && me.worker.autoAcceptEnabled) {
         playNotificationSound();
         showBrowserNotification(
-          textFor(language, "已接到新订单", "New order accepted"),
+          textFor(language, "New order accepted", "New order accepted"),
           newActiveOrder.orderNo
         );
       }
@@ -529,7 +529,7 @@ export function WorkerClient() {
           const newHallOrder = hall.orders.find((order) => !knownHallOrderIdsRef.current.has(order.id));
           playNotificationSound();
           showBrowserNotification(
-            textFor(language, "订单大厅有新订单", "New order in hall"),
+            textFor(language, "New order in hall", "New order in hall"),
             newHallOrder?.orderNo
           );
         }
@@ -696,12 +696,12 @@ export function WorkerClient() {
       invalidateRefreshes();
       setWorker(data);
       toast.success(enabled
-        ? textFor(language, "新订单提醒已开启", "New order alerts enabled")
-        : textFor(language, "新订单提醒已关闭", "New order alerts disabled"));
+        ? textFor(language, "New order alerts enabled", "New order alerts enabled")
+        : textFor(language, "New order alerts disabled", "New order alerts disabled"));
       if (enabled) {
         playNotificationSound(true);
         if (!notificationEnabled && typeof window !== "undefined" && "Notification" in window) {
-          toast.info(textFor(language, "提醒音已开启；如需系统通知，请在浏览器权限中允许通知。", "Sound is enabled. To receive system notifications, allow notifications in the browser permission panel."));
+          toast.info(textFor(language, "Sound is enabled. To receive system notifications, allow notifications in the browser permission panel.", "Sound is enabled. To receive system notifications, allow notifications in the browser permission panel."));
         }
       }
     } catch (error) {
@@ -713,8 +713,8 @@ export function WorkerClient() {
     primeNotificationSound();
     playNotificationSound(true);
     showBrowserNotification(
-      textFor(language, "UPI Scanner 测试提醒", "UPI Scanner test alert"),
-      textFor(language, "这是一个测试提醒。", "This is a test alert.")
+      textFor(language, "UPI Scanner test alert", "UPI Scanner test alert"),
+      textFor(language, "This is a test alert.", "This is a test alert.")
     );
   }
 
@@ -728,10 +728,10 @@ export function WorkerClient() {
       invalidateRefreshes();
       setWorker(data);
       setBindWalletOpen(false);
-      toast.success(textFor(language, "Binance 用户 ID 已绑定", "Binance user ID saved"));
+      toast.success(textFor(language, "Binance user ID saved", "Binance user ID saved"));
       void refreshAll(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : textFor(language, "绑定失败", "Bind failed"));
+      toast.error(error instanceof Error ? error.message : textFor(language, "Bind failed", "Bind failed"));
     } finally {
       setLoading(false);
     }
@@ -745,10 +745,10 @@ export function WorkerClient() {
         body: JSON.stringify({ amount: withdrawAmount }),
       });
       setWithdrawAmount("");
-      toast.success(textFor(language, "提现申请已提交", "Withdrawal request submitted"));
+      toast.success(textFor(language, "Withdrawal request submitted", "Withdrawal request submitted"));
       void refreshAll(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : textFor(language, "提现申请失败", "Withdrawal request failed"));
+      toast.error(error instanceof Error ? error.message : textFor(language, "Withdrawal request failed", "Withdrawal request failed"));
     } finally {
       setLoading(false);
     }
@@ -842,10 +842,10 @@ export function WorkerClient() {
         return next;
       });
       setWorker((current) => current ? { ...current, autoAcceptEnabled: false } : current);
-      toast.success(textFor(language, "订单已释放，并已关闭自动接单，避免马上重新接回", "Order released. Auto-accept was disabled to avoid immediately picking it again."));
+      toast.success(textFor(language, "Order released. Auto-accept was disabled to avoid immediately picking it again.", "Order released. Auto-accept was disabled to avoid immediately picking it again."));
       void refreshAll(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : textFor(language, "释放订单失败", "Release order failed"));
+      toast.error(error instanceof Error ? error.message : textFor(language, "Release order failed", "Release order failed"));
     } finally {
       setLoading(false);
     }
@@ -873,9 +873,9 @@ export function WorkerClient() {
     if (!url) return;
     try {
       await navigator.clipboard.writeText(url);
-      toast.success(textFor(language, "支付链接已复制", "Payment link copied"));
+      toast.success(textFor(language, "Payment link copied", "Payment link copied"));
     } catch {
-      toast.error(textFor(language, "复制失败，请手动打开后复制", "Copy failed. Please open the link and copy it manually."));
+      toast.error(textFor(language, "Copy failed. Please open the link and copy it manually.", "Copy failed. Please open the link and copy it manually."));
     }
   }
 
@@ -929,7 +929,7 @@ export function WorkerClient() {
           previousActiveOrderIdsRef.current = new Set([...Array.from(previousActiveOrderIdsRef.current), picked.id]);
           playNotificationSound();
           showBrowserNotification(
-            textFor(language, "已接到新订单", "New order accepted"),
+            textFor(language, "New order accepted", "New order accepted"),
             picked.orderNo
           );
         }
@@ -956,9 +956,9 @@ export function WorkerClient() {
       <Dialog open={bindWalletOpen} onOpenChange={setBindWalletOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{textFor(language, "绑定 Binance 用户 ID", "Bind Binance user ID")}</DialogTitle>
+            <DialogTitle>{textFor(language, "Bind Binance user ID", "Bind Binance user ID")}</DialogTitle>
             <DialogDescription>
-              {textFor(language, "提现需要绑定 Binance 用户 ID。绑定后，提现申请会记录当前 UID 快照，方便管理员打款核对。", "Withdrawals require a Binance user ID. Each request stores a snapshot for admin payout verification.")}
+              {textFor(language, "Withdrawals require a Binance user ID. Each request stores a snapshot for admin payout verification.", "Withdrawals require a Binance user ID. Each request stores a snapshot for admin payout verification.")}
             </DialogDescription>
           </DialogHeader>
           <FieldGroup>
@@ -968,9 +968,9 @@ export function WorkerClient() {
             </Field>
           </FieldGroup>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setBindWalletOpen(false)}>{textFor(language, "稍后再说", "Later")}</Button>
+            <Button variant="outline" onClick={() => setBindWalletOpen(false)}>{textFor(language, "Later", "Later")}</Button>
             <Button onClick={saveBinanceUserId} disabled={loading || !binanceUserIdInput.trim()}>
-              {textFor(language, "保存绑定", "Save")}
+              {textFor(language, "Save", "Save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1005,7 +1005,7 @@ export function WorkerClient() {
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <Link href="/worker/history" className={buttonVariants({ variant: "outline" })}><HistoryIcon data-icon="inline-start" />{copy.goHistory}</Link>
-                  <Link href="/worker/withdrawals" className={buttonVariants({ variant: "outline" })}><WalletIcon data-icon="inline-start" />{textFor(language, "提现记录", "Withdrawals")}</Link>
+                  <Link href="/worker/withdrawals" className={buttonVariants({ variant: "outline" })}><WalletIcon data-icon="inline-start" />{textFor(language, "Withdrawals", "Withdrawals")}</Link>
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between gap-3 rounded-2xl bg-muted/40 p-4">
@@ -1039,13 +1039,13 @@ export function WorkerClient() {
                   <div className="flex items-center gap-3">
                     <div className="grid size-10 place-items-center rounded-2xl bg-background text-muted-foreground shadow-sm"><Volume2Icon className="size-5" /></div>
                     <div>
-                      <div className="font-semibold">{textFor(language, "新订单提醒音", "New order sound")}</div>
+                      <div className="font-semibold">{textFor(language, "New order sound", "New order sound")}</div>
                       <div className="text-sm text-muted-foreground">
                         {browserNotifyPermission === "unsupported"
-                          ? textFor(language, "开启后播放提醒音；当前浏览器不支持系统通知。", "Play a sound when enabled. This browser does not support system notifications.")
+                          ? textFor(language, "Play a sound when enabled. This browser does not support system notifications.", "Play a sound when enabled. This browser does not support system notifications.")
                           : worker.autoAcceptEnabled
-                            ? textFor(language, "自动接单开启时，成功接到订单后播放提醒音并发送浏览器通知。", "When auto-accept is on, alerts are sent only after an order is assigned.")
-                            : textFor(language, "订单大厅出现新订单时播放提醒音并发送浏览器通知。", "Play a sound and send a browser notification when a new order appears in the hall.")}
+                            ? textFor(language, "When auto-accept is on, alerts are sent only after an order is assigned.", "When auto-accept is on, alerts are sent only after an order is assigned.")
+                            : textFor(language, "Play a sound and send a browser notification when a new order appears in the hall.", "Play a sound and send a browser notification when a new order appears in the hall.")}
                       </div>
                     </div>
                   </div>
@@ -1055,8 +1055,8 @@ export function WorkerClient() {
                       variant="outline"
                       size="icon-sm"
                       onClick={testNotificationSound}
-                      aria-label={textFor(language, "试听提醒", "Test notification sound")}
-                      title={textFor(language, "试听提醒", "Test notification sound")}
+                      aria-label={textFor(language, "Test notification sound", "Test notification sound")}
+                      title={textFor(language, "Test notification sound", "Test notification sound")}
                     >
                       <Volume2Icon />
                     </Button>
@@ -1073,65 +1073,65 @@ export function WorkerClient() {
 
           <Card className="rounded-3xl bg-background shadow-sm">
             <CardHeader>
-              <CardTitle className="flex flex-wrap items-center gap-2"><WalletIcon className="size-5 text-brand" />{textFor(language, "钱包", "Wallet")}{workerInAdvance && <Badge variant="secondary">{textFor(language, "预支中", "Advanced")}</Badge>}</CardTitle>
+              <CardTitle className="flex flex-wrap items-center gap-2"><WalletIcon className="size-5 text-brand" />{textFor(language, "Wallet", "Wallet")}{workerInAdvance && <Badge variant="secondary">{textFor(language, "Advanced", "Advanced")}</Badge>}</CardTitle>
               <CardDescription>
                 {worker.payoutMode === "PREPAID"
-                  ? textFor(language, "预付费模式：预支款会显示为负余额，完成订单后自动抵扣。", "Prepaid mode: advances show as negative balance and are offset by completed orders.")
-                  : textFor(language, "后付费模式：完成订单累计为可结算/可提现余额。", "Postpaid mode: completed orders accumulate into payable/withdrawable balance.")}
+                  ? textFor(language, "Prepaid mode: advances show as negative balance and are offset by completed orders.", "Prepaid mode: advances show as negative balance and are offset by completed orders.")
+                  : textFor(language, "Postpaid mode: completed orders accumulate into payable/withdrawable balance.", "Postpaid mode: completed orders accumulate into payable/withdrawable balance.")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-4">
                 <div className="grid grid-cols-3 gap-2">
-                  <InfoBox label={textFor(language, "钱包余额", "Balance")} value={formatBalance(stats?.wallet.balance)} />
-                  <InfoBox label={textFor(language, "可提现", "Available")} value={formatBalance(stats?.wallet.availableBalance)} />
-                  <InfoBox label={textFor(language, "待处理提现", "Pending")} value={formatBalance(stats?.wallet.pendingWithdrawalAmount)} />
+                  <InfoBox label={textFor(language, "Balance", "Balance")} value={formatBalance(stats?.wallet.balance)} />
+                  <InfoBox label={textFor(language, "Available", "Available")} value={formatBalance(stats?.wallet.availableBalance)} />
+                  <InfoBox label={textFor(language, "Pending", "Pending")} value={formatBalance(stats?.wallet.pendingWithdrawalAmount)} />
                 </div>
                 {workerInAdvance && (
                   <div className="rounded-2xl border border-warning/30 bg-warning/10 p-3 text-sm text-muted-foreground">
-                    <div className="font-semibold text-foreground">{textFor(language, "当前处于预支状态", "Currently in advance state")}</div>
+                    <div className="font-semibold text-foreground">{textFor(language, "Currently in advance state", "Currently in advance state")}</div>
                     <div className="mt-1">
-                      {textFor(language, "还需抵扣", "Remaining advance to offset")} {formatBalance(workerAdvanceDebt)}
-                      {textFor(language, "，完成订单收入会优先自动抵扣预支余额。", ". Completed order earnings will offset this advance first.")}
+                      {textFor(language, "Remaining advance to offset", "Remaining advance to offset")} {formatBalance(workerAdvanceDebt)}
+                      {textFor(language, ". Completed order earnings will offset this advance first.", ". Completed order earnings will offset this advance first.")}
                     </div>
                   </div>
                 )}
                 <div className="rounded-2xl bg-muted/40 p-3 text-sm text-muted-foreground">
                   <div className="font-semibold text-foreground">Binance UID</div>
-                  <div className="mt-1">{worker.binanceUserId || textFor(language, "未绑定，进入 worker 界面会提醒绑定。", "Not bound. You will be prompted to bind it.")}</div>
+                  <div className="mt-1">{worker.binanceUserId || textFor(language, "Not bound. You will be prompted to bind it.", "Not bound. You will be prompted to bind it.")}</div>
                   {worker.binanceUserId ? (
-                    <div className="mt-2 text-xs text-muted-foreground">{textFor(language, "已绑定，绑定后不可修改。", "Bound. It cannot be changed after binding.")}</div>
+                    <div className="mt-2 text-xs text-muted-foreground">{textFor(language, "Bound. It cannot be changed after binding.", "Bound. It cannot be changed after binding.")}</div>
                   ) : (
                     <Button className="mt-3" variant="outline" size="sm" onClick={() => { setBinanceUserIdInput(""); setBindWalletOpen(true); }}>
-                      {textFor(language, "绑定 Binance UID", "Bind Binance UID")}
+                      {textFor(language, "Bind Binance UID", "Bind Binance UID")}
                     </Button>
                   )}
                 </div>
                 <div className="flex flex-col gap-2 rounded-2xl bg-muted/40 p-3">
                   <FieldGroup>
                     <Field>
-                      <FieldLabel htmlFor="withdraw-amount">{textFor(language, "提现金额（USD）", "Withdrawal amount (USD)")}</FieldLabel>
+                      <FieldLabel htmlFor="withdraw-amount">{textFor(language, "Withdrawal amount (USD)", "Withdrawal amount (USD)")}</FieldLabel>
                       <div className="flex gap-2">
                         <Input id="withdraw-amount" className="flex-1" inputMode="decimal" value={withdrawAmount} onChange={(event) => setWithdrawAmount(event.target.value)} placeholder="10.00" />
                         <Button type="button" variant="outline" onClick={() => setWithdrawAmount(formatWithdrawInput(stats?.wallet.availableBalance))} disabled={(stats?.wallet.availableBalance ?? 0) <= 0}>
-                          {textFor(language, "全部", "All")}
+                          {textFor(language, "All", "All")}
                         </Button>
                       </div>
                     </Field>
                   </FieldGroup>
                   <Button onClick={requestWithdrawal} disabled={loading || !worker.binanceUserId || Number(withdrawAmount) <= 0}>
                     <DollarSignIcon data-icon="inline-start" />
-                    {textFor(language, "申请提现", "Request withdrawal")}
+                    {textFor(language, "Request withdrawal", "Request withdrawal")}
                   </Button>
                 </div>
                 <div className="flex flex-col gap-3 rounded-2xl bg-muted/40 p-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <div className="font-semibold text-foreground">{textFor(language, "提现记录", "Withdrawal requests")}</div>
-                    <div className="mt-1">{textFor(language, "提现申请已移到独立页面，可分页查询并取消待处理申请。", "Withdrawal requests now have a dedicated page with search, pagination, and pending request cancellation.")}</div>
+                    <div className="font-semibold text-foreground">{textFor(language, "Withdrawal requests", "Withdrawal requests")}</div>
+                    <div className="mt-1">{textFor(language, "Withdrawal requests now have a dedicated page with search, pagination, and pending request cancellation.", "Withdrawal requests now have a dedicated page with search, pagination, and pending request cancellation.")}</div>
                   </div>
                   <Link href="/worker/withdrawals" className={buttonVariants({ variant: "outline" })}>
                     <WalletIcon data-icon="inline-start" />
-                    {textFor(language, "查看提现记录", "View withdrawals")}
+                    {textFor(language, "View withdrawals", "View withdrawals")}
                   </Link>
                 </div>
               </div>
@@ -1197,11 +1197,11 @@ export function WorkerClient() {
                           className={buttonVariants({ variant: "outline" })}
                         >
                           <ExternalLinkIcon data-icon="inline-start" />
-                          {textFor(language, "打开支付链接", "Open payment link")}
+                          {textFor(language, "Open payment link", "Open payment link")}
                         </a>
                         <Button variant="outline" onClick={() => copyPaymentLink(activeOrder.paymentUrl)}>
                           <CopyIcon data-icon="inline-start" />
-                          {textFor(language, "复制支付链接", "Copy payment link")}
+                          {textFor(language, "Copy payment link", "Copy payment link")}
                         </Button>
                       </div>
                     )}
@@ -1218,12 +1218,12 @@ export function WorkerClient() {
                       <AlertTriangleIcon className="size-10 text-warning" />
                       <div>
                         <div className="font-semibold">
-                          {textFor(language, "二维码已到期，正在自动检测", "QR expired, auto-check active")}
+                          {textFor(language, "QR expired, auto-check active", "QR expired, auto-check active")}
                         </div>
                         <p className="mt-1 text-sm text-muted-foreground">
                           {textFor(
                             language,
-                            "该扫码订单已被接取，二维码到期后系统会在 5 分钟等待期内自动持续检测订阅状态；检测到 Plus 会自动完成订单。等待期结束仍未成功则订单会自动过期并退款。",
+                            "This scan order has been accepted. After the QR expires, the system will keep checking the subscription for 5 minutes. If Plus is detected the order completes automatically; otherwise it expires and is refunded.",
                             "This accepted scan order is checked automatically for 5 minutes after QR expiry. If Plus is detected, the order completes automatically; otherwise it expires and the user hold is refunded."
                           )}
                         </p>
@@ -1231,7 +1231,7 @@ export function WorkerClient() {
                       <div className="flex items-center gap-2 rounded-2xl border border-warning/30 bg-background/70 px-3 py-2 text-sm text-muted-foreground">
                         <Clock3Icon className="size-4 shrink-0 text-warning" />
                         <span>
-                          {textFor(language, "自动检测剩余 ", "Auto-check left ") + activeOrderCheckGraceRemainingText}
+                          {textFor(language, "Auto-check left ", "Auto-check left ") + activeOrderCheckGraceRemainingText}
                         </span>
                       </div>
                     </div>
@@ -1252,7 +1252,7 @@ export function WorkerClient() {
                       )}
                       {activeOrderIsPublicScan && (
                         <p className="text-sm text-muted-foreground">
-                          {textFor(language, "扫码订单会自动过期并退回用户冻结余额。", "The scan order will expire automatically and refund the user hold.")}
+                          {textFor(language, "The scan order will expire automatically and refund the user hold.", "The scan order will expire automatically and refund the user hold.")}
                         </p>
                       )}
                     </div>
@@ -1271,12 +1271,12 @@ export function WorkerClient() {
                       <div>
                         <div className="font-semibold">
                           {activeOrderIsPublicScan
-                            ? textFor(language, "等待用户二维码", "Waiting for user QR")
+                            ? textFor(language, "Waiting for user QR", "Waiting for user QR")
                             : activeOrderUpiFailed ? copy.upiFailedTitle : copy.upiPendingTitle}
                         </div>
                         <p className="mt-1 text-sm text-muted-foreground">
                           {activeOrderIsPublicScan
-                            ? textFor(language, "该扫码订单应由用户发布二维码；如果暂时未显示，请刷新或释放订单。", "This scan order should already include a user QR. Refresh or release it if it is not visible.")
+                            ? textFor(language, "This scan order should already include a user QR. Refresh or release it if it is not visible.", "This scan order should already include a user QR. Refresh or release it if it is not visible.")
                             : copy.upiPendingDesc}
                         </p>
                         {activeOrder.upiExtractError && <p className="mt-2 text-sm text-destructive">{activeOrder.upiExtractError}</p>}
@@ -1315,7 +1315,7 @@ export function WorkerClient() {
                   </Button>
                   <Button variant="outline" onClick={releaseActive} disabled={loading || generatingUpi || activeOrderGenerating || activeOrderChecking}>
                     <Undo2Icon data-icon="inline-start" />
-                    {textFor(language, "释放订单", "Release order")}
+                    {textFor(language, "Release order", "Release order")}
                   </Button>
                 </div>
                 <div className="flex flex-col gap-2 rounded-2xl bg-muted/40 p-3">
@@ -1354,7 +1354,7 @@ export function WorkerClient() {
                             <div className="font-semibold">{order.orderNo}</div>
                             <div className="mt-1 text-xs text-muted-foreground">
                               {order.source === "PUBLIC_SCAN"
-                                ? `${textFor(language, "扫码订单", "Scan order")} · ${formatMoney(order.scanPrice ?? 0)}`
+                                ? `${textFor(language, "Scan order", "Scan order")} · ${formatMoney(order.scanPrice ?? 0)}`
                                 : copy.upiPendingTitle}
                             </div>
                           </div>

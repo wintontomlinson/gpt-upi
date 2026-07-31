@@ -260,15 +260,15 @@ function withdrawalStatusVariant(status: BillingWithdrawal["status"]): "default"
 
 function ledgerTypeText(type: string) {
   const map: Record<string, string> = {
-    CHAIN_DEPOSIT: "链上充值",
-    CDK_REDEEM: "CDK 兑换",
-    ADMIN_ADJUSTMENT: "余额调整 / Premium",
-    SCAN_ORDER_FREEZE: "扫码订单冻结",
-    SCAN_ORDER_REFUND: "扫码订单退款",
-    SCAN_ORDER_SPEND: "扫码订单支付",
-    WITHDRAWAL_FREEZE: "提现冻结",
-    WITHDRAWAL_REFUND: "提现退回",
-    WITHDRAWAL_PAID: "提现已支付",
+    CHAIN_DEPOSIT: "Chain Deposit",
+    CDK_REDEEM: "CDK Redemption",
+    ADMIN_ADJUSTMENT: "Balance Adjustment / Premium",
+    SCAN_ORDER_FREEZE: "Scan Order Frozen",
+    SCAN_ORDER_REFUND: "Scan Order Refund",
+    SCAN_ORDER_SPEND: "Scan Order Payment",
+    WITHDRAWAL_FREEZE: "Withdrawal Frozen",
+    WITHDRAWAL_REFUND: "Withdrawal Refund",
+    WITHDRAWAL_PAID: "Withdrawal Paid",
   };
   return map[type] || type;
 }
@@ -276,7 +276,7 @@ function ledgerTypeText(type: string) {
 async function copyText(value?: string | null) {
   if (!value) return;
   await navigator.clipboard.writeText(value);
-  toast.success("已复制");
+  toast.success("Copied");
 }
 
 export function AdminBillingClient() {
@@ -304,9 +304,9 @@ export function AdminBillingClient() {
       const nextData = await apiFetch<AdminBillingResponse>(pagedBillingUrl({ tab: activeTab, page, search: deferredSearch }));
       setData(nextData);
       setPagination(nextData.pagination || null);
-      if (!silent) toast.success("账单数据已刷新");
+      if (!silent) toast.success("Billing data refreshed");
     } catch (error) {
-      if (!silent) toast.error(error instanceof Error ? error.message : "加载账单数据失败");
+      if (!silent) toast.error(error instanceof Error ? error.message : "Failed to load billing data");
     } finally {
       setLoading(false);
     }
@@ -320,7 +320,7 @@ export function AdminBillingClient() {
 
   const previewCorrection = useCallback(async () => {
     if (!correctionTxHash.trim() || !correctionTarget.trim()) {
-      toast.error("请先填写交易哈希和正确入账用户");
+      toast.error("Please fill in the transaction hash and correct recipient user");
       return;
     }
     try {
@@ -335,9 +335,9 @@ export function AdminBillingClient() {
       if (!correctionTargetOrderId && preview.recommendedTargetOrderId) {
         setCorrectionTargetOrderId(preview.recommendedTargetOrderId);
       }
-      toast.success("充值纠错预览已生成");
+      toast.success("Deposit correction preview generated");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "生成充值纠错预览失败");
+      toast.error(error instanceof Error ? error.message : "Failed to generate deposit correction preview");
     } finally {
       setCorrectionLoading(false);
     }
@@ -345,7 +345,7 @@ export function AdminBillingClient() {
 
   const executeCorrection = useCallback(async () => {
     if (!correctionPreview?.plan.canExecute) {
-      toast.error("当前预览不可执行，请先处理错误提示");
+      toast.error("Current preview is not executable. Please resolve the errors first.");
       return;
     }
     try {
@@ -363,10 +363,10 @@ export function AdminBillingClient() {
       });
       setCorrectionPreview(result);
       setCorrectionConfirmText("");
-      toast.success("充值纠错已执行");
+      toast.success("Deposit correction executed");
       void refresh(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "执行充值纠错失败");
+      toast.error(error instanceof Error ? error.message : "Failed to execute deposit correction");
     } finally {
       setCorrectionExecuting(false);
     }
@@ -383,31 +383,31 @@ export function AdminBillingClient() {
   const filteredChainDeposits = data.chainDeposits;
 
   return (
-    <AppFrame audience="admin" title="充值账单" subtitle="查看用户钱包、充值订单、链上入账、提现申请和钱包流水。" onRefresh={() => refresh()}>
+    <AppFrame audience="admin" title="Billing" subtitle="View user wallets, deposit orders, on-chain credits, withdrawal requests, and wallet ledger." onRefresh={() => refresh()}>
       <div className="grid gap-4 xl:grid-cols-4">
-        <MetricCard title="用户钱包" value={data.summary.walletCount} description={`可用 ${formatUsdt(data.summary.availableBalance)} · 冻结 ${formatUsdt(data.summary.frozenBalance)}`} icon={WalletIcon} tone="brand" />
-        <MetricCard title="已入账充值" value={formatUsdt(data.summary.totalDeposited)} description={`${data.summary.paidDepositOrderCount} 个充值订单已支付`} icon={ArrowDownToLineIcon} tone="success" />
-        <MetricCard title="待支付充值" value={data.summary.pendingDepositOrderCount} description={`等待 ${formatUsdt(data.summary.pendingDepositOrderAmount)}`} icon={ReceiptTextIcon} tone="warning" />
-        <MetricCard title="提现待处理" value={data.summary.pendingWithdrawalCount} description={`冻结 ${formatUsdt(data.summary.pendingWithdrawalAmount)}`} icon={ArrowUpFromLineIcon} tone="info" />
+        <MetricCard title="User Wallets" value={data.summary.walletCount} description={`Available ${formatUsdt(data.summary.availableBalance)} · Frozen ${formatUsdt(data.summary.frozenBalance)}`} icon={WalletIcon} tone="brand" />
+        <MetricCard title="Credited Deposits" value={formatUsdt(data.summary.totalDeposited)} description={`${data.summary.paidDepositOrderCount} deposit order(s) paid`} icon={ArrowDownToLineIcon} tone="success" />
+        <MetricCard title="Pending Deposits" value={data.summary.pendingDepositOrderCount} description={`Waiting ${formatUsdt(data.summary.pendingDepositOrderAmount)}`} icon={ReceiptTextIcon} tone="warning" />
+        <MetricCard title="Pending Withdrawals" value={data.summary.pendingWithdrawalCount} description={`Frozen ${formatUsdt(data.summary.pendingWithdrawalAmount)}`} icon={ArrowUpFromLineIcon} tone="info" />
       </div>
 
       <Card className="mt-4 rounded-3xl bg-background shadow-sm">
         <CardHeader>
-          <CardTitle>钱包记录</CardTitle>
+          <CardTitle>Wallet Records</CardTitle>
           <CardDescription>
-            最近 300 条充值订单、钱包流水、提现申请和链上入账记录。搜索支持 TG、订单号、地址、交易哈希和备注。
+            Latest 300 deposit orders, wallet ledger, withdrawal requests, and on-chain credit records. Search supports TG, order number, address, TX hash, and notes.
           </CardDescription>
           <CardAction>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setCorrectionOpen(true)}>
-                <WrenchIcon data-icon="inline-start" />充值纠错
+                <WrenchIcon data-icon="inline-start" />Deposit Correction
               </Button>
               <div className="relative w-80 max-w-full">
                 <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="搜索用户 / 地址 / TX / 订单" className="pl-9" />
+                <Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Search user / address / TX / order" className="pl-9" />
               </div>
               <Button variant="outline" size="sm" onClick={() => refresh()} disabled={loading}>
-                <RefreshCwIcon data-icon="inline-start" className={loading ? "animate-spin" : undefined} />刷新
+                <RefreshCwIcon data-icon="inline-start" className={loading ? "animate-spin" : undefined} />Refresh
               </Button>
             </div>
           </CardAction>
@@ -415,10 +415,10 @@ export function AdminBillingClient() {
         <CardContent>
           <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value as BillingTab); setPage(1); }} className="gap-4">
             <TabsList className="flex w-full flex-wrap justify-start rounded-2xl p-1">
-              <TabsTrigger value="deposits" className="min-w-28">充值订单 {activeTab === "deposits" && pagination ? pagination.total : data.summary.depositOrderCount}</TabsTrigger>
-              <TabsTrigger value="ledgers" className="min-w-28">钱包流水 {activeTab === "ledgers" && pagination ? pagination.total : data.summary.ledgerCount}</TabsTrigger>
-              <TabsTrigger value="withdrawals" className="min-w-28">提现申请 {activeTab === "withdrawals" && pagination ? pagination.total : data.summary.withdrawalCount}</TabsTrigger>
-              <TabsTrigger value="chain" className="min-w-28">链上入账 {activeTab === "chain" && pagination ? pagination.total : data.summary.chainDepositCount}</TabsTrigger>
+              <TabsTrigger value="deposits" className="min-w-28">Deposit Orders {activeTab === "deposits" && pagination ? pagination.total : data.summary.depositOrderCount}</TabsTrigger>
+              <TabsTrigger value="ledgers" className="min-w-28">Wallet Ledger {activeTab === "ledgers" && pagination ? pagination.total : data.summary.ledgerCount}</TabsTrigger>
+              <TabsTrigger value="withdrawals" className="min-w-28">Withdrawals {activeTab === "withdrawals" && pagination ? pagination.total : data.summary.withdrawalCount}</TabsTrigger>
+              <TabsTrigger value="chain" className="min-w-28">On-chain Credits {activeTab === "chain" && pagination ? pagination.total : data.summary.chainDepositCount}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="deposits">
@@ -426,12 +426,12 @@ export function AdminBillingClient() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>订单</TableHead>
-                      <TableHead>用户</TableHead>
-                      <TableHead>金额</TableHead>
-                      <TableHead>状态</TableHead>
-                      <TableHead>地址 / TX</TableHead>
-                      <TableHead>时间</TableHead>
+                      <TableHead>Order</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Address / TX</TableHead>
+                      <TableHead>Time</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -447,7 +447,7 @@ export function AdminBillingClient() {
                         </TableCell>
                         <TableCell>
                           <div className="font-semibold">{formatUsdt(item.payAmount)}</div>
-                          <div className="text-xs text-muted-foreground">基础金额 {formatUsdt(item.baseAmount)}</div>
+                          <div className="text-xs text-muted-foreground">Base amount {formatUsdt(item.baseAmount)}</div>
                         </TableCell>
                         <TableCell><Badge variant={depositStatusVariant(item.status)}>{item.status}</Badge></TableCell>
                         <TableCell>
@@ -456,13 +456,13 @@ export function AdminBillingClient() {
                           {item.fromAddress && <div className="font-mono text-xs text-muted-foreground">from {shortValue(item.fromAddress)}</div>}
                         </TableCell>
                         <TableCell>
-                          <div className="text-sm">创建 {formatDateTime(item.createdAt)}</div>
-                          <div className="text-xs text-muted-foreground">过期 {formatDateTime(item.expiresAt)}</div>
-                          {item.paidAt && <div className="text-xs text-success">支付 {formatDateTime(item.paidAt)}</div>}
+                          <div className="text-sm">Created {formatDateTime(item.createdAt)}</div>
+                          <div className="text-xs text-muted-foreground">Expires {formatDateTime(item.expiresAt)}</div>
+                          {item.paidAt && <div className="text-xs text-success">Paid {formatDateTime(item.paidAt)}</div>}
                         </TableCell>
                       </TableRow>
                     ))}
-                    {filteredDepositOrders.length === 0 && <TableRow><TableCell colSpan={6} className="h-32 text-center text-muted-foreground">暂无充值订单</TableCell></TableRow>}
+                    {filteredDepositOrders.length === 0 && <TableRow><TableCell colSpan={6} className="h-32 text-center text-muted-foreground">No deposit orders</TableCell></TableRow>}
                   </TableBody>
                 </Table>
               </div>
@@ -473,12 +473,12 @@ export function AdminBillingClient() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>用户</TableHead>
-                      <TableHead>类型</TableHead>
-                      <TableHead>变动</TableHead>
-                      <TableHead>关联</TableHead>
-                      <TableHead>备注</TableHead>
-                      <TableHead>时间</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Change</TableHead>
+                      <TableHead>Reference</TableHead>
+                      <TableHead>Note</TableHead>
+                      <TableHead>Time</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -490,8 +490,8 @@ export function AdminBillingClient() {
                         </TableCell>
                         <TableCell><Badge variant="secondary">{ledgerTypeText(item.type)}</Badge></TableCell>
                         <TableCell>
-                          <div className="text-sm">可用 <span className={item.availableDelta >= 0 ? "text-success" : "text-destructive"}>{formatUsdt(item.availableDelta)}</span></div>
-                          <div className="text-xs text-muted-foreground">冻结 {formatUsdt(item.frozenDelta)}</div>
+                          <div className="text-sm">Available <span className={item.availableDelta >= 0 ? "text-success" : "text-destructive"}>{formatUsdt(item.availableDelta)}</span></div>
+                          <div className="text-xs text-muted-foreground">Frozen {formatUsdt(item.frozenDelta)}</div>
                         </TableCell>
                         <TableCell>
                           <div className="font-mono text-xs">{item.orderId ? shortValue(item.orderId, 8, 6) : "-"}</div>
@@ -501,7 +501,7 @@ export function AdminBillingClient() {
                         <TableCell>{formatDateTime(item.createdAt)}</TableCell>
                       </TableRow>
                     ))}
-                    {filteredLedgers.length === 0 && <TableRow><TableCell colSpan={6} className="h-32 text-center text-muted-foreground">暂无钱包流水</TableCell></TableRow>}
+                    {filteredLedgers.length === 0 && <TableRow><TableCell colSpan={6} className="h-32 text-center text-muted-foreground">No wallet ledger entries</TableCell></TableRow>}
                   </TableBody>
                 </Table>
               </div>
@@ -512,12 +512,12 @@ export function AdminBillingClient() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>用户</TableHead>
-                      <TableHead>金额</TableHead>
-                      <TableHead>状态</TableHead>
-                      <TableHead>提现地址</TableHead>
-                      <TableHead>备注</TableHead>
-                      <TableHead>时间</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Withdrawal Address</TableHead>
+                      <TableHead>Note</TableHead>
+                      <TableHead>Time</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -529,7 +529,7 @@ export function AdminBillingClient() {
                         </TableCell>
                         <TableCell>
                           <div className="font-semibold">{formatUsdt(item.amount)}</div>
-                          <div className="text-xs text-muted-foreground">手续费 {formatUsdt(item.fee)} / 冻结 {formatUsdt(item.totalFrozen)}</div>
+                          <div className="text-xs text-muted-foreground">Fee {formatUsdt(item.fee)} / Frozen {formatUsdt(item.totalFrozen)}</div>
                         </TableCell>
                         <TableCell><Badge variant={withdrawalStatusVariant(item.status)}>{item.status}</Badge></TableCell>
                         <TableCell>
@@ -538,12 +538,12 @@ export function AdminBillingClient() {
                         </TableCell>
                         <TableCell className="max-w-[300px] truncate">{item.adminNote || item.note || "-"}</TableCell>
                         <TableCell>
-                          <div className="text-sm">申请 {formatDateTime(item.requestedAt)}</div>
-                          {item.processedAt && <div className="text-xs text-muted-foreground">处理 {formatDateTime(item.processedAt)}</div>}
+                          <div className="text-sm">Requested {formatDateTime(item.requestedAt)}</div>
+                          {item.processedAt && <div className="text-xs text-muted-foreground">Processed {formatDateTime(item.processedAt)}</div>}
                         </TableCell>
                       </TableRow>
                     ))}
-                    {filteredWithdrawals.length === 0 && <TableRow><TableCell colSpan={6} className="h-32 text-center text-muted-foreground">暂无提现申请</TableCell></TableRow>}
+                    {filteredWithdrawals.length === 0 && <TableRow><TableCell colSpan={6} className="h-32 text-center text-muted-foreground">No withdrawal requests</TableCell></TableRow>}
                   </TableBody>
                 </Table>
               </div>
@@ -554,12 +554,12 @@ export function AdminBillingClient() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>用户</TableHead>
-                      <TableHead>金额</TableHead>
-                      <TableHead>状态</TableHead>
-                      <TableHead>交易</TableHead>
-                      <TableHead>地址</TableHead>
-                      <TableHead>时间</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Transaction</TableHead>
+                      <TableHead>Address</TableHead>
+                      <TableHead>Time</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -580,12 +580,12 @@ export function AdminBillingClient() {
                           <div className="font-mono text-xs text-muted-foreground">to {shortValue(item.toAddress)}</div>
                         </TableCell>
                         <TableCell>
-                          <div className="text-sm">发现 {formatDateTime(item.createdAt)}</div>
-                          {item.creditedAt && <div className="text-xs text-success">入账 {formatDateTime(item.creditedAt)}</div>}
+                          <div className="text-sm">Detected {formatDateTime(item.createdAt)}</div>
+                          {item.creditedAt && <div className="text-xs text-success">Credited {formatDateTime(item.creditedAt)}</div>}
                         </TableCell>
                       </TableRow>
                     ))}
-                    {filteredChainDeposits.length === 0 && <TableRow><TableCell colSpan={6} className="h-32 text-center text-muted-foreground">暂无链上入账</TableCell></TableRow>}
+                    {filteredChainDeposits.length === 0 && <TableRow><TableCell colSpan={6} className="h-32 text-center text-muted-foreground">No on-chain credits</TableCell></TableRow>}
                   </TableBody>
                 </Table>
               </div>
@@ -594,10 +594,10 @@ export function AdminBillingClient() {
           <AdminListPagination pagination={pagination} loading={loading} onPageChange={setPage} className="mt-4" />
 
           <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1"><DatabaseIcon className="size-3.5" />流水总数 {data.summary.ledgerCount}</span>
-            <span className="rounded-full bg-muted px-3 py-1">充值订单总数 {data.summary.depositOrderCount}</span>
-            <span className="rounded-full bg-muted px-3 py-1">链上记录总数 {data.summary.chainDepositCount}</span>
-            <span className="rounded-full bg-muted px-3 py-1">用户总消费 {formatUsdt(data.summary.totalSpent)}</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1"><DatabaseIcon className="size-3.5" />Ledger total {data.summary.ledgerCount}</span>
+            <span className="rounded-full bg-muted px-3 py-1">Deposit orders total {data.summary.depositOrderCount}</span>
+            <span className="rounded-full bg-muted px-3 py-1">On-chain records total {data.summary.chainDepositCount}</span>
+            <span className="rounded-full bg-muted px-3 py-1">Total user spending {formatUsdt(data.summary.totalSpent)}</span>
           </div>
         </CardContent>
       </Card>
@@ -605,16 +605,16 @@ export function AdminBillingClient() {
       <Dialog open={correctionOpen} onOpenChange={setCorrectionOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>充值纠错</DialogTitle>
+            <DialogTitle>Deposit Correction</DialogTitle>
             <DialogDescription>
-              用于处理统一收款地址下金额撞单、错误入账等情况。请先预览影响范围，确认无误后再执行。
+              For handling amount collisions and incorrect credits under a unified deposit address. Preview the impact first, then execute after confirming.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 md:grid-cols-[1.4fr_0.7fr]">
             <div className="space-y-3">
               <div className="grid gap-2">
-                <Label htmlFor="correction-tx">交易哈希</Label>
+                <Label htmlFor="correction-tx">Transaction Hash</Label>
                 <Input
                   id="correction-tx"
                   value={correctionTxHash}
@@ -625,49 +625,49 @@ export function AdminBillingClient() {
               </div>
               <div className="grid gap-2 md:grid-cols-2">
                 <div className="grid gap-2">
-                  <Label htmlFor="correction-log-index">LogIndex（可选）</Label>
+                  <Label htmlFor="correction-log-index">LogIndex (optional)</Label>
                   <Input
                     id="correction-log-index"
                     value={correctionLogIndex}
                     onChange={(event) => { setCorrectionLogIndex(event.target.value); resetCorrectionPreview(); }}
-                    placeholder="多条 Transfer 时填写"
+                    placeholder="Fill when there are multiple Transfers"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="correction-target">正确入账用户</Label>
+                  <Label htmlFor="correction-target">Correct Recipient</Label>
                   <Input
                     id="correction-target"
                     value={correctionTarget}
                     onChange={(event) => { setCorrectionTarget(event.target.value); resetCorrectionPreview(); }}
-                    placeholder="Telegram ID 或 @username"
+                    placeholder="Telegram ID or @username"
                   />
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="correction-note">备注（可选）</Label>
+                <Label htmlFor="correction-note">Note (optional)</Label>
                 <Input
                   id="correction-note"
                   value={correctionNote}
                   onChange={(event) => setCorrectionNote(event.target.value)}
-                  placeholder="留空则自动生成纠错备注"
+                  placeholder="Leave blank to auto-generate correction note"
                 />
               </div>
               <Button type="button" variant="outline" onClick={() => void previewCorrection()} disabled={correctionLoading || !correctionTxHash.trim() || !correctionTarget.trim()}>
                 <SearchIcon data-icon="inline-start" className={correctionLoading ? "animate-spin" : undefined} />
-                {correctionLoading ? "正在预览..." : "预览纠错"}
+                {correctionLoading ? "Previewing..." : "Preview Correction"}
               </Button>
             </div>
 
             <div className="rounded-2xl border border-warning/30 bg-warning/5 p-3 text-xs text-muted-foreground">
               <div className="mb-2 flex items-center gap-2 font-semibold text-warning">
                 <AlertTriangleIcon className="size-4" />
-                安全规则
+                Safety Rules
               </div>
               <ul className="list-disc space-y-1 pl-4">
-                <li>执行前会再次校验当前钱包、订单、流水和 tx 状态。</li>
-                <li>错误用户余额不足时不会执行。</li>
-                <li>CONFIRM 输入错误不会执行；请复制正确的 CONFIRM。</li>
-                <li>建议只处理已经和用户确认过的交易。</li>
+                <li>The system re-verifies wallet, order, ledger, and tx state before execution.</li>
+                <li>Will not execute if the incorrect user has insufficient balance.</li>
+                <li>Will not execute if CONFIRM input is wrong; please copy the correct CONFIRM.</li>
+                <li>Only process transactions confirmed with the user.</li>
               </ul>
             </div>
           </div>
@@ -676,31 +676,31 @@ export function AdminBillingClient() {
             <div className="space-y-4 rounded-3xl border border-border bg-muted/20 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <div className="font-semibold">纠错预览</div>
+                  <div className="font-semibold">Correction Preview</div>
                   <div className="font-mono text-xs text-muted-foreground">{shortValue(correctionPreview.tx.txHash, 14, 12)} · logIndex {correctionPreview.tx.logIndex}</div>
                 </div>
                 <Badge variant={correctionPreview.plan.canExecute ? "default" : "destructive"}>
-                  {correctionPreview.plan.canExecute ? "可执行" : "不可执行"}
+                  {correctionPreview.plan.canExecute ? "Executable" : "Not Executable"}
                 </Badge>
               </div>
 
               <div className="grid gap-3 md:grid-cols-3">
                 <div className="rounded-2xl bg-background p-3">
-                  <div className="text-xs text-muted-foreground">链上金额</div>
+                  <div className="text-xs text-muted-foreground">On-chain Amount</div>
                   <div className="mt-1 text-lg font-semibold">{formatUsdt(correctionPreview.tx.amount)}</div>
                   <div className="mt-1 font-mono text-xs text-muted-foreground">from {shortValue(correctionPreview.tx.fromAddress)}</div>
                 </div>
                 <div className="rounded-2xl bg-background p-3">
-                  <div className="text-xs text-muted-foreground">当前错误归属</div>
+                  <div className="text-xs text-muted-foreground">Current Incorrect Owner</div>
                   <div className="mt-1 font-semibold">{userLabel(correctionPreview.current)}</div>
-                  <div className="text-xs text-muted-foreground">可用 {formatUsdt(correctionPreview.current.availableBalance)} → {formatUsdt(correctionPreview.plan.debit.afterAvailable)}</div>
-                  <div className="text-xs text-muted-foreground">总充值 {formatUsdt(correctionPreview.current.totalDeposited)} → {formatUsdt(correctionPreview.plan.debit.afterTotalDeposited)}</div>
+                  <div className="text-xs text-muted-foreground">Available {formatUsdt(correctionPreview.current.availableBalance)} → {formatUsdt(correctionPreview.plan.debit.afterAvailable)}</div>
+                  <div className="text-xs text-muted-foreground">Total deposited {formatUsdt(correctionPreview.current.totalDeposited)} → {formatUsdt(correctionPreview.plan.debit.afterTotalDeposited)}</div>
                 </div>
                 <div className="rounded-2xl bg-background p-3">
-                  <div className="text-xs text-muted-foreground">正确入账用户</div>
+                  <div className="text-xs text-muted-foreground">Correct Recipient</div>
                   <div className="mt-1 font-semibold">{userLabel(correctionPreview.target)}</div>
-                  <div className="text-xs text-muted-foreground">可用 {formatUsdt(correctionPreview.target.availableBalance)} → {formatUsdt(correctionPreview.plan.credit.afterAvailable)}</div>
-                  <div className="text-xs text-muted-foreground">总充值 {formatUsdt(correctionPreview.target.totalDeposited)} → {formatUsdt(correctionPreview.plan.credit.afterTotalDeposited)}</div>
+                  <div className="text-xs text-muted-foreground">Available {formatUsdt(correctionPreview.target.availableBalance)} → {formatUsdt(correctionPreview.plan.credit.afterAvailable)}</div>
+                  <div className="text-xs text-muted-foreground">Total deposited {formatUsdt(correctionPreview.target.totalDeposited)} → {formatUsdt(correctionPreview.plan.credit.afterTotalDeposited)}</div>
                 </div>
               </div>
 
@@ -711,21 +711,21 @@ export function AdminBillingClient() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="correction-target-order">目标充值单绑定</Label>
+                <Label htmlFor="correction-target-order">Target Deposit Order Binding</Label>
                 <select
                   id="correction-target-order"
                   value={correctionTargetOrderId}
                   onChange={(event) => { setCorrectionTargetOrderId(event.target.value); setCorrectionPreview(null); setCorrectionConfirmText(""); }}
                   className="h-10 rounded-xl border border-input bg-background px-3 text-sm"
                 >
-                  <option value="">不绑定订单，只按 tx 补余额</option>
+                  <option value="">Do not bind order, credit balance by TX only</option>
                   {correctionPreview.candidateOrders.map((order) => (
                     <option key={order.id} value={order.id} disabled={!order.canBind}>
-                      {order.orderNo} · {order.status} · 应付 {formatUsdt(order.payAmount)}{order.canBind ? "" : " · 已被其他交易支付"}
+                      {order.orderNo} · {order.status} · Pay {formatUsdt(order.payAmount)}{order.canBind ? "" : " · Already paid by another TX"}
                     </option>
                   ))}
                 </select>
-                <div className="text-xs text-muted-foreground">切换绑定目标后，请重新点击“预览纠错”。</div>
+                <div className="text-xs text-muted-foreground">After switching the binding target, click &quot;Preview Correction&quot; again.</div>
               </div>
 
               {(correctionPreview.plan.errors.length > 0 || correctionPreview.plan.warnings.length > 0) && (
@@ -740,26 +740,26 @@ export function AdminBillingClient() {
               )}
 
               <div className="grid gap-2">
-                <Label htmlFor="correction-confirm">确认文本</Label>
+                <Label htmlFor="correction-confirm">Confirm Text</Label>
                 <Input
                   id="correction-confirm"
                   value={correctionConfirmText}
                   onChange={(event) => setCorrectionConfirmText(event.target.value)}
-                  placeholder="输入 CONFIRM 后才能执行"
+                  placeholder="Type CONFIRM to proceed"
                 />
               </div>
             </div>
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setCorrectionOpen(false)} disabled={correctionExecuting}>关闭</Button>
+            <Button type="button" variant="outline" onClick={() => setCorrectionOpen(false)} disabled={correctionExecuting}>Close</Button>
             <Button
               type="button"
               disabled={!correctionPreview?.plan.canExecute || correctionConfirmText !== "CONFIRM" || correctionExecuting}
               onClick={() => void executeCorrection()}
             >
               {correctionExecuting ? <RefreshCwIcon data-icon="inline-start" className="animate-spin" /> : <CheckCircle2Icon data-icon="inline-start" />}
-              {correctionExecuting ? "正在执行..." : "确认执行纠错"}
+              {correctionExecuting ? "Executing..." : "Confirm Correction"}
             </Button>
           </DialogFooter>
         </DialogContent>

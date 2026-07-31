@@ -1536,7 +1536,7 @@ export function UpiExtractClient({ mockMode = false, mockSeedAt }: { mockMode?: 
       const data = await apiFetch<BuffStatsResponse>(`/api/upi-extract/buff?${params.toString()}`);
       applyBuffStats(data, true);
     } catch {
-      // Buff 只是趣味展示，失败时保持当前数据。
+      // Buff is cosmetic only; keep current data on failure.
     }
   }, [applyBuffStats, viewerId]);
 
@@ -1563,7 +1563,7 @@ export function UpiExtractClient({ mockMode = false, mockSeedAt }: { mockMode?: 
       });
       applyBuffStats(data, false);
     } catch {
-      // 打开次数统计失败不影响弹窗阅读。
+      // Guide open count failure does not affect the popup.
     }
   }, [applyBuffStats, viewerId]);
 
@@ -1647,7 +1647,7 @@ export function UpiExtractClient({ mockMode = false, mockSeedAt }: { mockMode?: 
         }
         void refreshActivity();
       } catch {
-        // 单个任务进度轮询只影响实时展示，失败时等待下一轮。
+        // Single task progress poll only affects live display; wait for next round on failure.
       }
     };
 
@@ -2454,18 +2454,10 @@ export function UpiExtractClient({ mockMode = false, mockSeedAt }: { mockMode?: 
       <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center gap-5 px-5 py-6">
         <div className="text-center">
           <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-            <span className="text-brand">UPI</span> {t.title}
+            <span className="text-brand">GPT</span> UPI Hub
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {t.subtitle}
-          </p>
-          <p className="mt-1 text-xs font-medium text-muted-foreground">
-            {extractCapacity ? t.channelCapacityNote(
-              extractCapacity.public.concurrency,
-              extractCapacity.public.proxyCount,
-              extractCapacity.premium.concurrency,
-              extractCapacity.premium.proxyCount
-            ) : t.channelCapacityLoading}
+            Extract ChatGPT UPI payment QR codes instantly. Paste your session token and get your QR code.
           </p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           </div>
@@ -2998,11 +2990,6 @@ export function UpiExtractClient({ mockMode = false, mockSeedAt }: { mockMode?: 
       />
 
       <div className="fixed bottom-5 right-5 flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2 rounded-full border border-border bg-background/95 px-4 py-2 text-sm shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-xl">
-          <UsersRoundIcon className="size-4 text-muted-foreground" />
-          <span className="text-muted-foreground">{t.onlineLabel}</span>
-          <span className="font-semibold">{onlineViewers ?? "-"}</span>
-        </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
           {siteSettings.tgInviteEnabled && (
             <a
@@ -3015,22 +3002,6 @@ export function UpiExtractClient({ mockMode = false, mockSeedAt }: { mockMode?: 
               {t.tgGroup}
             </a>
           )}
-          <div className="flex rounded-full border border-border bg-background/95 p-1 text-xs shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-xl">
-            <button
-              type="button"
-              onClick={() => changeLanguage("zh")}
-              className={cn("rounded-full px-3 py-1 transition", lang === "zh" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}
-            >
-              中文
-            </button>
-            <button
-              type="button"
-              onClick={() => changeLanguage("en")}
-              className={cn("rounded-full px-3 py-1 transition", lang === "en" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}
-            >
-              EN
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -5830,11 +5801,11 @@ function compactFailureMessage(error: string | null | undefined, labels: typeof 
   const lower = message.toLowerCase();
   const method = normalizePaymentExtractMethod(extractMethod);
 
-  if (lower.includes("deposit is temporarily closed") || message.includes("充值功能暂时关闭")) {
+  if (lower.includes("deposit is temporarily closed") || message.includes("deposit is temporarily closed")) {
     return labels.depositDisabled;
   }
 
-  if (lower.includes("maintenance") || lower.includes("temporarily under maintenance") || message.includes("UPI 提取功能暂时关闭")) {
+  if (lower.includes("maintenance") || lower.includes("temporarily under maintenance") || message.includes("extraction is temporarily closed")) {
     return labels.maintenanceDesc;
   }
 
@@ -5843,7 +5814,7 @@ function compactFailureMessage(error: string | null | undefined, labels: typeof 
     lower.includes("session token") && lower.includes("invalid") ||
     lower.includes("session cookie") && lower.includes("invalid") ||
     lower.includes("session json") && lower.includes("invalid") ||
-    message.includes("没有识别到有效的 session token")
+    message.includes("no valid session token")
   ) {
     return labels.failedReasonInvalidSession;
   }
@@ -5852,7 +5823,7 @@ function compactFailureMessage(error: string | null | undefined, labels: typeof 
     lower.includes("no_free_trial") ||
     lower.includes("does not have the free trial offer") ||
     lower.includes("no free trial") ||
-    message.includes("没有免费试用")
+    message.includes("no free trial")
   ) {
     return labels.failedReasonNoFreeTrial;
   }
@@ -5863,7 +5834,7 @@ function compactFailureMessage(error: string | null | undefined, labels: typeof 
     lower.includes("cannot create a upi payment") ||
     lower.includes("cannot create an ideal payment") ||
     lower.includes("cannot create this payment method") ||
-    message.includes("无法创建当前渠道的支付")
+    message.includes("cannot create this payment method")
   ) {
     return labels.failedReasonPaymentMethodUnavailable;
   }
@@ -5872,7 +5843,7 @@ function compactFailureMessage(error: string | null | undefined, labels: typeof 
     lower.includes("billing country must match request country") ||
     lower.includes("billing country") && lower.includes("request country") ||
     lower.includes("region is locked") ||
-    message.includes("账号地区已被 OpenAI 锁定")
+    message.includes("region is locked by OpenAI")
   ) {
     return labels.failedReasonBillingCountry;
   }

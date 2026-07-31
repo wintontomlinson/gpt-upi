@@ -54,27 +54,27 @@ type Copy = {
 
 const COPY: Record<AppLanguage, Copy> = {
   zh: {
-    title: "历史记录",
-    subtitle: "支持搜索和分页查看已处理、异常、取消与超时记录。",
-    refresh: "刷新",
-    refreshed: "历史记录已刷新",
-    refreshFailed: "刷新失败",
-    back: "返回工作台",
-    order: "订单",
-    result: "处理结果",
-    price: "单价快照",
-    settlement: "结单状态",
-    time: "完成时间",
-    note: "备注",
-    empty: "暂无历史记录",
-    settled: "已结",
-    unsettled: "未结",
+    title: "History",
+    subtitle: "Search and browse processed, issue, cancelled, and expired order records.",
+    refresh: "Refresh",
+    refreshed: "History refreshed",
+    refreshFailed: "Refresh failed",
+    back: "Back to workbench",
+    order: "Order",
+    result: "Result",
+    price: "Rate snapshot",
+    settlement: "Settlement",
+    time: "Completed at",
+    note: "Note",
+    empty: "No history yet",
+    settled: "Settled",
+    unsettled: "Unsettled",
     switchLanguage: "EN",
-    searchPlaceholder: "搜索订单号 / 状态 / 备注",
-    pageSummary: (page, totalPages, total, pageSize) => `第 ${page} / ${totalPages} 页，共 ${total} 条，每页 ${pageSize} 条`,
-    totalSummary: (total) => `共 ${total} 条`,
-    prevPage: "上一页",
-    nextPage: "下一页",
+    searchPlaceholder: "Search order / status / note",
+    pageSummary: (page, totalPages, total, pageSize) => `Page ${page} / ${totalPages}, ${total} total, ${pageSize} per page`,
+    totalSummary: (total) => `${total} total`,
+    prevPage: "Previous",
+    nextPage: "Next",
   },
   en: {
     title: "History",
@@ -92,7 +92,7 @@ const COPY: Record<AppLanguage, Copy> = {
     empty: "No history yet",
     settled: "Settled",
     unsettled: "Unsettled",
-    switchLanguage: "中文",
+    switchLanguage: "EN",
     searchPlaceholder: "Search order / status / note",
     pageSummary: (page, totalPages, total, pageSize) => `Page ${page} / ${totalPages}, ${total} total, ${pageSize} per page`,
     totalSummary: (total) => `${total} total`,
@@ -102,7 +102,7 @@ const COPY: Record<AppLanguage, Copy> = {
 };
 
 const resultLabels: Record<AppLanguage, Record<HistoryRecord["result"], string>> = {
-  zh: { COMPLETED: "完成", PROBLEM: "异常重传", FAILED: "失败", CANCELLED: "取消", EXPIRED: "超时" },
+  zh: { COMPLETED: "Completed", PROBLEM: "Issue", FAILED: "Failed", CANCELLED: "Cancelled", EXPIRED: "Expired" },
   en: { COMPLETED: "Completed", PROBLEM: "Issue", FAILED: "Failed", CANCELLED: "Cancelled", EXPIRED: "Expired" },
 };
 
@@ -137,7 +137,7 @@ export function WorkerHistoryClient() {
       setUnauthorized(false);
       if (!silent) toast.success(COPY[language].refreshed);
     } catch (error) {
-      if (error instanceof Error && (error.message.includes("未登录") || error.message.toLowerCase().includes("unauthorized"))) {
+      if (error instanceof Error && (error.message.includes("unauthorized") || error.message.toLowerCase().includes("unauthorized"))) {
         setUnauthorized(true);
         return;
       }

@@ -81,9 +81,9 @@ export function AdminDashboardClient() {
       setCdks(nextCdks);
       setWorkers(nextWorkers);
       setSettings(nextSettings);
-      if (!silent) toast.success("管理数据已刷新");
+      if (!silent) toast.success("Admin data refreshed");
     } catch (error) {
-      if (!silent) toast.error(error instanceof Error ? error.message : "刷新失败");
+      if (!silent) toast.error(error instanceof Error ? error.message : "Refresh failed");
     } finally {
       setLoading(false);
     }
@@ -98,10 +98,10 @@ export function AdminDashboardClient() {
         body: JSON.stringify({ tgInviteEnabled: enabled }),
       });
       setSettings(nextSettings);
-      toast.success(enabled ? "公益站 TG 群组按钮已显示" : "公益站 TG 群组按钮已隐藏");
+      toast.success(enabled ? "TG group button shown" : "TG group button hidden");
     } catch (error) {
       setSettings(previous);
-      toast.error(error instanceof Error ? error.message : "设置失败");
+      toast.error(error instanceof Error ? error.message : "Settings failed");
     }
   }, [settings]);
 
@@ -114,10 +114,10 @@ export function AdminDashboardClient() {
         body: JSON.stringify({ depositEnabled: enabled }),
       });
       setSettings(nextSettings);
-      toast.success(enabled ? "充值功能已开启" : "充值功能已关闭");
+      toast.success(enabled ? "Deposit enabled" : "Deposit disabled");
     } catch (error) {
       setSettings(previous);
-      toast.error(error instanceof Error ? error.message : "保存充值设置失败");
+      toast.error(error instanceof Error ? error.message : "Failed to save deposit settings");
     }
   }, [settings]);
 
@@ -130,10 +130,10 @@ export function AdminDashboardClient() {
         body: JSON.stringify({ extractMethodSelectionEnabled: enabled }),
       });
       setSettings(nextSettings);
-      toast.success(enabled ? "提取渠道选择已开启" : "提取渠道选择已关闭，前台默认 UPI 渠道");
+      toast.success(enabled ? "Extract channel selection enabled" : "Extract channel selection disabled, defaulting to UPI");
     } catch (error) {
       setSettings(previous);
-      toast.error(error instanceof Error ? error.message : "保存提取渠道设置失败");
+      toast.error(error instanceof Error ? error.message : "Failed to save extract channel settings");
     }
   }, [settings]);
 
@@ -146,10 +146,10 @@ export function AdminDashboardClient() {
         body: JSON.stringify({ customProxyEnabled: enabled }),
       });
       setSettings(nextSettings);
-      toast.success(enabled ? "用户自定义代理功能已开启" : "用户自定义代理功能已关闭");
+      toast.success(enabled ? "Custom proxy enabled" : "Custom proxy disabled");
     } catch (error) {
       setSettings(previous);
-      toast.error(error instanceof Error ? error.message : "保存自定义代理设置失败");
+      toast.error(error instanceof Error ? error.message : "Failed to save custom proxy settings");
     }
   }, [settings]);
 
@@ -162,52 +162,52 @@ export function AdminDashboardClient() {
   const unsettledAmount = workers.reduce((sum, worker) => sum + (worker.unsettledAmount ?? 0), 0);
 
   return (
-    <AppFrame audience="admin" title="全局管理" subtitle="查看系统概览，并进入充值 CDK、接单账号、订单、代理、提取和用户管理等页面。" onRefresh={() => refresh()}>
+    <AppFrame audience="admin" title="Global Admin" subtitle="View system overview and access Recharge CDK, Workers, Orders, Proxies, Extract, and User management." onRefresh={() => refresh()}>
       <div className="grid gap-4 xl:grid-cols-3">
-        <MetricCard title="充值 CDK 数量" value={cdks.length} description="进入充值 CDK 页面可批量生成、查看和按批次导出。" icon={KeyRoundIcon} tone="brand" />
-        <MetricCard title="未兑换价值" value={`${cdks.reduce((sum, cdk) => sum + (!cdk.redeemedAt && cdk.status === "ACTIVE" ? cdk.amount : 0), 0).toFixed(2)}U`} description="全部未兑换充值 CDK 的金额合计。" icon={DatabaseIcon} tone="success" />
-        <MetricCard title="未结金额" value={formatMoney(unsettledAmount)} description="已完成但未结单的 worker 收入。" icon={ShieldCheckIcon} tone="warning" />
+        <MetricCard title="Recharge CDK Count" value={cdks.length} description="Go to the Recharge CDK page to batch-generate, view, and export by batch." icon={KeyRoundIcon} tone="brand" />
+        <MetricCard title="Unredeemed Value" value={`${cdks.reduce((sum, cdk) => sum + (!cdk.redeemedAt && cdk.status === "ACTIVE" ? cdk.amount : 0), 0).toFixed(2)}U`} description="Total amount of all unredeemed recharge CDKs." icon={DatabaseIcon} tone="success" />
+        <MetricCard title="Unsettled Amount" value={formatMoney(unsettledAmount)} description="Completed but unsettled worker earnings." icon={ShieldCheckIcon} tone="warning" />
       </div>
 
       <Card className="mt-4 rounded-3xl bg-background shadow-sm">
         <CardHeader>
-          <CardTitle>公益站设置</CardTitle>
-          <CardDescription>控制 UPI 公益二维码提取页右下角按钮、用户充值入口等公开页面功能。</CardDescription>
+          <CardTitle>Site Settings</CardTitle>
+          <CardDescription>Control TG group button, user deposit entry, and other public page features.</CardDescription>
           <CardAction><Globe2Icon className="size-5 text-muted-foreground" /></CardAction>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="font-medium">显示 TG 群组按钮</div>
+              <div className="font-medium">Show TG group button</div>
               <div className="mt-1 text-sm text-muted-foreground">
-                开启后，公益提取页右下角会显示 TG 群组按钮，点击打开 {settings.tgInviteUrl}
+                When enabled, the TG group button is shown on the extract page. Opens {settings.tgInviteUrl}
               </div>
             </div>
             <Switch checked={settings.tgInviteEnabled} onCheckedChange={setTgInviteEnabled} disabled={loading} />
           </div>
           <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="font-medium">开启用户充值</div>
+              <div className="font-medium">Enable user deposit</div>
               <div className="mt-1 text-sm text-muted-foreground">
-                关闭后，UPI 提取页的钱包充值入口会禁用，服务端也会拒绝创建新的充值订单。
+                When disabled, the wallet deposit entry on the UPI extract page is hidden and the server rejects new deposit orders.
               </div>
             </div>
             <Switch checked={settings.depositEnabled} onCheckedChange={setDepositEnabled} disabled={loading} />
           </div>
           <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="font-medium">显示提取渠道选择</div>
+              <div className="font-medium">Show extract channel selection</div>
               <div className="mt-1 text-sm text-muted-foreground">
-                关闭后，用户侧默认 UPI 渠道，后端也会忽略其它渠道参数。
+                When disabled, UPI channel is used by default and the backend ignores other channel parameters.
               </div>
             </div>
             <Switch checked={settings.extractMethodSelectionEnabled} onCheckedChange={setExtractMethodSelectionEnabled} disabled={loading} />
           </div>
           <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="font-medium">允许用户自定义代理</div>
+              <div className="font-medium">Allow custom proxies</div>
               <div className="mt-1 text-sm text-muted-foreground">
-                关闭后，用户侧隐藏自定义 checkout/provider 代理，后端也会忽略用户代理参数。
+                When disabled, custom checkout/provider proxy options are hidden and the backend ignores user proxy parameters.
               </div>
             </div>
             <Switch checked={settings.customProxyEnabled} onCheckedChange={setCustomProxyEnabled} disabled={loading} />
@@ -218,40 +218,40 @@ export function AdminDashboardClient() {
       <div className="mt-4 grid gap-4 lg:grid-cols-[420px_1fr]">
         <Card className="rounded-3xl bg-background shadow-sm">
           <CardHeader>
-            <CardTitle>接单账号</CardTitle>
-            <CardDescription>账号总数和当前在线接单方放在同一个卡片内。</CardDescription>
+            <CardTitle>Worker Accounts</CardTitle>
+            <CardDescription>Total accounts and currently online workers in one card.</CardDescription>
             <CardAction><UsersRoundIcon className="size-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-muted/40 p-4"><div className="text-sm text-muted-foreground">接单账号</div><div className="mt-2 text-4xl font-semibold tracking-tight">{workers.length}</div></div>
-              <div className="rounded-2xl bg-muted/40 p-4"><div className="text-sm text-muted-foreground">在线接单方</div><div className="mt-2 text-4xl font-semibold tracking-tight">{onlineWorkers}</div></div>
+              <div className="rounded-2xl bg-muted/40 p-4"><div className="text-sm text-muted-foreground">Workers</div><div className="mt-2 text-4xl font-semibold tracking-tight">{workers.length}</div></div>
+              <div className="rounded-2xl bg-muted/40 p-4"><div className="text-sm text-muted-foreground">Online Workers</div><div className="mt-2 text-4xl font-semibold tracking-tight">{onlineWorkers}</div></div>
             </div>
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              <Link href="/admin/workers" className={buttonVariants({ variant: "outline" })}><UsersRoundIcon data-icon="inline-start" />管理接单账号</Link>
-              <Link href="/admin/cdks" className={buttonVariants({ variant: "outline" })}><KeyRoundIcon data-icon="inline-start" />管理充值 CDK</Link>
-              <Link href="/admin/orders" className={buttonVariants({ variant: "outline" })}><ClipboardListIcon data-icon="inline-start" />查看订单</Link>
-              <Link href="/admin/proxies" className={buttonVariants({ variant: "outline" })}><Globe2Icon data-icon="inline-start" />代理列表</Link>
-              <Link href="/admin/upi-extract" className={buttonVariants({ variant: "outline" })}><ActivityIcon data-icon="inline-start" />提取管理</Link>
-              <Link href="/admin/users" className={buttonVariants({ variant: "outline" })}><UsersRoundIcon data-icon="inline-start" />用户管理</Link>
-              <Link href="/admin/billing" className={buttonVariants({ variant: "outline" })}><WalletIcon data-icon="inline-start" />充值账单</Link>
+              <Link href="/admin/workers" className={buttonVariants({ variant: "outline" })}><UsersRoundIcon data-icon="inline-start" />Manage Workers</Link>
+              <Link href="/admin/cdks" className={buttonVariants({ variant: "outline" })}><KeyRoundIcon data-icon="inline-start" />Manage Recharge CDK</Link>
+              <Link href="/admin/orders" className={buttonVariants({ variant: "outline" })}><ClipboardListIcon data-icon="inline-start" />View Orders</Link>
+              <Link href="/admin/proxies" className={buttonVariants({ variant: "outline" })}><Globe2Icon data-icon="inline-start" />Proxy List</Link>
+              <Link href="/admin/upi-extract" className={buttonVariants({ variant: "outline" })}><ActivityIcon data-icon="inline-start" />Extract Management</Link>
+              <Link href="/admin/users" className={buttonVariants({ variant: "outline" })}><UsersRoundIcon data-icon="inline-start" />User Management</Link>
+              <Link href="/admin/billing" className={buttonVariants({ variant: "outline" })}><WalletIcon data-icon="inline-start" />Billing</Link>
             </div>
           </CardContent>
         </Card>
 
         <Card className="rounded-3xl bg-background shadow-sm">
-          <CardHeader><CardTitle>管理入口</CardTitle><CardDescription>常用管理功能已经拆分为独立页面。</CardDescription></CardHeader>
+          <CardHeader><CardTitle>Admin Navigation</CardTitle><CardDescription>Common admin features are on separate pages.</CardDescription></CardHeader>
           <CardContent>
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              <AdminNavCard title="充值 CDK" description="批量生成 upi_ 充值 key、按批次导出、查看兑换状态。" href="/admin/cdks" icon={KeyRoundIcon} />
-              <AdminNavCard title="接单账号" description="创建 Telegram worker、设置单价、结单和钱包。" href="/admin/workers" icon={UserPlusIcon} />
-              <AdminNavCard title="全部订单" description="查看订单大厅、进行中、需重传和历史订单。" href="/admin/orders" icon={ClipboardListIcon} />
-              <AdminNavCard title="代理列表" description="管理公共提取代理池，检测出口国家和连通性。" href="/admin/proxies" icon={Globe2Icon} />
-              <AdminNavCard title="提取管理" description="暂停提取入口，查看实时任务，调整并发上限。" href="/admin/upi-extract" icon={ActivityIcon} />
-              <AdminNavCard title="用户管理" description="管理用户身份、余额、提现申请和充值设置。" href="/admin/users" icon={UsersRoundIcon} />
-              <AdminNavCard title="充值账单" description="查看用户钱包流水、充值订单、链上入账和提现记录。" href="/admin/billing" icon={WalletIcon} />
+              <AdminNavCard title="Recharge CDK" description="Batch-generate upi_ recharge keys, export by batch, and view redemption status." href="/admin/cdks" icon={KeyRoundIcon} />
+              <AdminNavCard title="Worker Accounts" description="Create Telegram workers, set unit price, settle, and manage wallets." href="/admin/workers" icon={UserPlusIcon} />
+              <AdminNavCard title="All Orders" description="View order hall, in-progress, needs re-upload, and history orders." href="/admin/orders" icon={ClipboardListIcon} />
+              <AdminNavCard title="Proxy List" description="Manage public extraction proxy pool, check exit country and connectivity." href="/admin/proxies" icon={Globe2Icon} />
+              <AdminNavCard title="Extract Management" description="Pause extraction, view real-time tasks, adjust concurrency limits." href="/admin/upi-extract" icon={ActivityIcon} />
+              <AdminNavCard title="User Management" description="Manage user identity, balance, withdrawal requests, and deposit settings." href="/admin/users" icon={UsersRoundIcon} />
+              <AdminNavCard title="Billing" description="View user wallet transactions, deposit orders, on-chain credits, and withdrawals." href="/admin/billing" icon={WalletIcon} />
             </div>
-            {loading && <p className="mt-4 text-sm text-muted-foreground">正在刷新数据…</p>}
+            {loading && <p className="mt-4 text-sm text-muted-foreground">Refreshing data...</p>}
           </CardContent>
         </Card>
       </div>
@@ -297,9 +297,9 @@ export function AdminCdksClient() {
       setBatches(nextBatches.items);
       setCdkPagination(nextCdks.pagination);
       setBatchPagination(nextBatches.pagination);
-      if (!silent) toast.success("充值 CDK 数据已刷新");
+      if (!silent) toast.success("Recharge CDK data refreshed");
     } catch (error) {
-      if (!silent) toast.error(error instanceof Error ? error.message : "刷新失败");
+      if (!silent) toast.error(error instanceof Error ? error.message : "Refresh failed");
     }
   }, [batchPage, cdkPage, deferredBatchSearch, deferredCdkSearch]);
 
@@ -313,9 +313,9 @@ export function AdminCdksClient() {
       });
       setCdkPage(1);
       await refresh(true);
-      toast.success(`充值 CDK 已创建：${formatCdkAmount(cdkAmount)}`);
+      toast.success(`Recharge CDK created: ${formatCdkAmount(cdkAmount)}`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "创建 CDK 失败");
+      toast.error(error instanceof Error ? error.message : "Failed to create CDK");
     } finally {
       setLoading(false);
     }
@@ -337,9 +337,9 @@ export function AdminCdksClient() {
       setBatchPage(1);
       setCdkPage(1);
       await refresh(true);
-      toast.success(`已生成 ${result.batch.cdkCount} 个 ${formatCdkAmount(result.batch.amount)} 充值 CDK`);
+      toast.success(`Generated ${result.batch.cdkCount} recharge CDK(s) of ${formatCdkAmount(result.batch.amount)}`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "批量生成 CDK 失败");
+      toast.error(error instanceof Error ? error.message : "Failed to batch-generate CDKs");
     } finally {
       setLoading(false);
     }
@@ -355,16 +355,16 @@ export function AdminCdksClient() {
   const redeemedValue = cdks.reduce((sum, cdk) => sum + (cdk.redeemedAt ? cdk.amount : 0), 0);
 
   return (
-    <AppFrame audience="admin" title="充值 CDK" subtitle="生成 upi_ 开头的充值券，用户可在钱包内兑换为 USDT 余额。当前支持 1.8U、5U、10U。" onRefresh={() => refresh()}>
+    <AppFrame audience="admin" title="Recharge CDK" subtitle="Generate upi_ recharge keys. Users can redeem them as USDT balance. Currently supports 1.8U, 5U, 10U." onRefresh={() => refresh()}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-          <Badge variant="secondary">总数 {cdkPagination?.total ?? cdks.length}</Badge>
-          <Badge variant="outline">本页已兑换 {redeemedCount}</Badge>
-          <Badge variant="outline">本页未兑换价值 {formatCdkAmount(activeValue)}</Badge>
-          <Badge variant="outline">本页已兑换价值 {formatCdkAmount(redeemedValue)}</Badge>
+          <Badge variant="secondary">Total {cdkPagination?.total ?? cdks.length}</Badge>
+          <Badge variant="outline">Redeemed (page) {redeemedCount}</Badge>
+          <Badge variant="outline">Unredeemed value (page) {formatCdkAmount(activeValue)}</Badge>
+          <Badge variant="outline">Redeemed value (page) {formatCdkAmount(redeemedValue)}</Badge>
         </div>
         <a href="/api/admin/cdks/export" download className={buttonVariants({ variant: "outline" })}>
-          <DownloadIcon data-icon="inline-start" />导出全部 CSV
+          <DownloadIcon data-icon="inline-start" />Export all CSV
         </a>
       </div>
 
@@ -372,20 +372,20 @@ export function AdminCdksClient() {
         <div className="flex flex-col gap-4">
           <Card className="rounded-3xl bg-background shadow-sm">
             <CardHeader>
-              <CardTitle>批量生成充值 CDK</CardTitle>
-              <CardDescription>自动生成 upi_xxxxxxxxxxxxxxxx 格式 key，并给每个 key 绑定固定充值金额。</CardDescription>
+              <CardTitle>Batch Generate Recharge CDK</CardTitle>
+              <CardDescription>Auto-generate upi_xxxxxxxxxxxxxxxx format keys with a fixed recharge amount.</CardDescription>
               <CardAction><KeyRoundIcon className="size-5 text-muted-foreground" /></CardAction>
             </CardHeader>
             <CardContent>
               <form onSubmit={createBatch} className="flex flex-col gap-5">
                 <FieldGroup>
                   <Field>
-                    <FieldLabel htmlFor="batch-key-count">生成数量</FieldLabel>
+                    <FieldLabel htmlFor="batch-key-count">Count</FieldLabel>
                     <Input id="batch-key-count" type="number" min={1} max={1000} value={batchKeyCount} onChange={(event) => setBatchKeyCount(Number(event.target.value))} />
-                    <FieldDescription>单批最多 1000 个。</FieldDescription>
+                    <FieldDescription>Max 1000 per batch.</FieldDescription>
                   </Field>
                   <Field>
-                    <FieldLabel>充值金额</FieldLabel>
+                    <FieldLabel>Recharge amount</FieldLabel>
                     <div className="grid grid-cols-3 gap-2">
                       {rechargeAmounts.map((amount) => (
                         <Button key={amount} type="button" variant={batchAmount === amount ? "default" : "outline"} className="rounded-xl" onClick={() => setBatchAmount(amount)}>
@@ -395,23 +395,23 @@ export function AdminCdksClient() {
                     </div>
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="batch-name">批次名称</FieldLabel>
-                    <Input id="batch-name" value={batchName} onChange={(event) => setBatchName(event.target.value)} placeholder="例如 2026-06 活动批次" />
+                    <FieldLabel htmlFor="batch-name">Batch name</FieldLabel>
+                    <Input id="batch-name" value={batchName} onChange={(event) => setBatchName(event.target.value)} placeholder="e.g. 2026-06 campaign batch" />
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="batch-remark">备注</FieldLabel>
-                    <Input id="batch-remark" value={batchRemark} onChange={(event) => setBatchRemark(event.target.value)} placeholder="非必填，会同步写入本批 CDK" />
+                    <FieldLabel htmlFor="batch-remark">Notes</FieldLabel>
+                    <Input id="batch-remark" value={batchRemark} onChange={(event) => setBatchRemark(event.target.value)} placeholder="Optional, will be written to all CDKs in this batch" />
                   </Field>
                 </FieldGroup>
-                <Button type="submit" disabled={loading}><PlusIcon data-icon="inline-start" />生成批次</Button>
+                <Button type="submit" disabled={loading}><PlusIcon data-icon="inline-start" />Generate Batch</Button>
               </form>
             </CardContent>
           </Card>
 
           <Card className="rounded-3xl bg-background shadow-sm">
             <CardHeader>
-              <CardTitle>手动创建充值 CDK</CardTitle>
-              <CardDescription>创建单个充值券；自定义 key 也建议使用 upi_ 前缀。</CardDescription>
+              <CardTitle>Manual Create Recharge CDK</CardTitle>
+              <CardDescription>Create a single recharge key. Custom keys should also use the upi_ prefix.</CardDescription>
               <CardAction><KeyRoundIcon className="size-5 text-muted-foreground" /></CardAction>
             </CardHeader>
             <CardContent>
@@ -422,13 +422,13 @@ export function AdminCdksClient() {
                     <div className="flex gap-2">
                       <Input id="cdk-code" value={cdkCode} onChange={(event) => setCdkCode(event.target.value)} />
                       <Button type="button" variant="outline" className="shrink-0 rounded-xl" onClick={() => setCdkCode(makeRechargeCdkCode())}>
-                        随机生成
+                        Randomize
                       </Button>
                     </div>
-                    <FieldDescription>每个充值 CDK 只能兑换一次。</FieldDescription>
+                    <FieldDescription>Each recharge CDK can only be redeemed once.</FieldDescription>
                   </Field>
                   <Field>
-                    <FieldLabel>充值金额</FieldLabel>
+                    <FieldLabel>Recharge amount</FieldLabel>
                     <div className="grid grid-cols-3 gap-2">
                       {rechargeAmounts.map((amount) => (
                         <Button key={amount} type="button" variant={cdkAmount === amount ? "default" : "outline"} className="rounded-xl" onClick={() => setCdkAmount(amount)}>
@@ -437,9 +437,9 @@ export function AdminCdksClient() {
                       ))}
                     </div>
                   </Field>
-                  <Field><FieldLabel htmlFor="cdk-remark">备注</FieldLabel><Input id="cdk-remark" value={cdkRemark} onChange={(event) => setCdkRemark(event.target.value)} placeholder="非必填" /></Field>
+                  <Field><FieldLabel htmlFor="cdk-remark">Notes</FieldLabel><Input id="cdk-remark" value={cdkRemark} onChange={(event) => setCdkRemark(event.target.value)} placeholder="Optional" /></Field>
                 </FieldGroup>
-                <Button type="submit" disabled={loading}><PlusIcon data-icon="inline-start" />创建充值 CDK</Button>
+                <Button type="submit" disabled={loading}><PlusIcon data-icon="inline-start" />Create Recharge CDK</Button>
               </form>
             </CardContent>
           </Card>
@@ -448,29 +448,29 @@ export function AdminCdksClient() {
         <div className="flex flex-col gap-4">
           <Card className="rounded-3xl bg-background shadow-sm">
             <CardHeader>
-              <CardTitle>生成批次</CardTitle>
-              <CardDescription>每个批次都可以单独导出。</CardDescription>
-              <CardAction><Button variant="outline" size="sm" onClick={() => refresh()}><RefreshCwIcon data-icon="inline-start" />刷新</Button></CardAction>
+              <CardTitle>Batches</CardTitle>
+              <CardDescription>Each batch can be exported separately.</CardDescription>
+              <CardAction><Button variant="outline" size="sm" onClick={() => refresh()}><RefreshCwIcon data-icon="inline-start" />Refresh</Button></CardAction>
             </CardHeader>
             <CardContent>
               <div className="mb-3 flex items-center gap-2">
                 <SearchIcon className="size-4 text-muted-foreground" />
-                <Input value={batchSearch} onChange={(event) => { setBatchSearch(event.target.value); setBatchPage(1); }} placeholder="搜索批次 ID / 名称 / 备注" />
+                <Input value={batchSearch} onChange={(event) => { setBatchSearch(event.target.value); setBatchPage(1); }} placeholder="Search batch ID / name / notes" />
               </div>
               <div className="overflow-hidden rounded-3xl border border-border">
                 <Table>
-                  <TableHeader><TableRow><TableHead>批次</TableHead><TableHead>数量</TableHead><TableHead>金额</TableHead><TableHead>创建时间</TableHead><TableHead className="text-right">操作</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow><TableHead>Batch</TableHead><TableHead>Count</TableHead><TableHead>Amount</TableHead><TableHead>Created</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {batches.map((batch) => (
                       <TableRow key={batch.id}>
-                        <TableCell><div className="font-semibold">{batch.name || batch.id}</div><div className="text-xs text-muted-foreground">{batch.remark || "无备注"}</div></TableCell>
+                        <TableCell><div className="font-semibold">{batch.name || batch.id}</div><div className="text-xs text-muted-foreground">{batch.remark || "No notes"}</div></TableCell>
                         <TableCell><Badge variant="secondary">{batch.cdkCount}</Badge></TableCell>
                         <TableCell>{formatCdkAmount(batch.amount)}</TableCell>
                         <TableCell>{formatDateTime(batch.createdAt)}</TableCell>
-                        <TableCell className="text-right"><a href={`/api/admin/cdks/batches/${batch.id}/export`} download className={buttonVariants({ variant: "outline", size: "sm" })}><DownloadIcon data-icon="inline-start" />导出</a></TableCell>
+                        <TableCell className="text-right"><a href={`/api/admin/cdks/batches/${batch.id}/export`} download className={buttonVariants({ variant: "outline", size: "sm" })}><DownloadIcon data-icon="inline-start" />Export</a></TableCell>
                       </TableRow>
                     ))}
-                    {batches.length === 0 && <TableRow><TableCell colSpan={5} className="h-28 text-center text-muted-foreground">暂无批次</TableCell></TableRow>}
+                    {batches.length === 0 && <TableRow><TableCell colSpan={5} className="h-28 text-center text-muted-foreground">No batches</TableCell></TableRow>}
                   </TableBody>
                 </Table>
               </div>
@@ -479,29 +479,29 @@ export function AdminCdksClient() {
           </Card>
 
           <Card className="rounded-3xl bg-background shadow-sm">
-            <CardHeader><CardTitle>充值 CDK 列表</CardTitle><CardDescription>未兑换的 ACTIVE key 可以在用户钱包中兑换余额，同一个 key 只能兑换一次。</CardDescription><CardAction><Button variant="outline" size="sm" onClick={() => refresh()}><RefreshCwIcon data-icon="inline-start" />刷新</Button></CardAction></CardHeader>
+            <CardHeader><CardTitle>Recharge CDK List</CardTitle><CardDescription>Active unredeemed keys can be redeemed in the user wallet. Each key can only be redeemed once.</CardDescription><CardAction><Button variant="outline" size="sm" onClick={() => refresh()}><RefreshCwIcon data-icon="inline-start" />Refresh</Button></CardAction></CardHeader>
             <CardContent>
               <div className="mb-3 flex items-center gap-2">
                 <SearchIcon className="size-4 text-muted-foreground" />
-                <Input value={cdkSearch} onChange={(event) => { setCdkSearch(event.target.value); setCdkPage(1); }} placeholder="搜索 CDK / 兑换用户 / 备注" />
+                <Input value={cdkSearch} onChange={(event) => { setCdkSearch(event.target.value); setCdkPage(1); }} placeholder="Search CDK / redeemer / notes" />
               </div>
               <div className="overflow-hidden rounded-3xl border border-border">
                 <Table>
-                  <TableHeader><TableRow><TableHead>CDK</TableHead><TableHead>金额</TableHead><TableHead>状态</TableHead><TableHead>兑换用户</TableHead><TableHead>创建时间</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow><TableHead>CDK</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead><TableHead>Redeemed By</TableHead><TableHead>Created</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {cdks.map((cdk) => {
                       const redeemed = Boolean(cdk.redeemedAt);
                       return (
                         <TableRow key={cdk.id}>
-                          <TableCell><div className="font-semibold">{cdk.code}</div><div className="text-xs text-muted-foreground">{cdk.remark || (cdk.batchId ? `批次：${cdk.batchId}` : "-")}</div></TableCell>
+                          <TableCell><div className="font-semibold">{cdk.code}</div><div className="text-xs text-muted-foreground">{cdk.remark || (cdk.batchId ? `Batch: ${cdk.batchId}` : "-")}</div></TableCell>
                           <TableCell>{formatCdkAmount(cdk.amount)}</TableCell>
-                          <TableCell><Badge variant={redeemed ? "secondary" : cdk.status === "ACTIVE" ? "default" : "outline"}>{redeemed ? "已兑换" : cdk.status === "ACTIVE" ? "未兑换" : cdk.status}</Badge></TableCell>
+                          <TableCell><Badge variant={redeemed ? "secondary" : cdk.status === "ACTIVE" ? "default" : "outline"}>{redeemed ? "Redeemed" : cdk.status === "ACTIVE" ? "Active" : cdk.status}</Badge></TableCell>
                           <TableCell>{redeemed ? <div><div className="font-medium">{cdk.redeemedByTelegramName || "-"}</div><div className="text-xs text-muted-foreground">{cdk.redeemedByTelegramId || "-"} - {formatDateTime(cdk.redeemedAt || cdk.createdAt)}</div></div> : "-"}</TableCell>
                           <TableCell>{formatDateTime(cdk.createdAt)}</TableCell>
                         </TableRow>
                       );
                     })}
-                    {cdks.length === 0 && <TableRow><TableCell colSpan={5} className="h-28 text-center text-muted-foreground">暂无充值 CDK</TableCell></TableRow>}
+                    {cdks.length === 0 && <TableRow><TableCell colSpan={5} className="h-28 text-center text-muted-foreground">No recharge CDKs</TableCell></TableRow>}
                   </TableBody>
                 </Table>
               </div>
@@ -518,11 +518,11 @@ type AdminOrderFilter = "ALL" | "HALL" | "ACTIVE" | "REUPLOAD" | "HISTORY";
 
 const historyOrderStatuses: OrderStatus[] = ["COMPLETED", "FAILED", "CANCELLED", "EXPIRED"];
 const orderFilterLabels: Record<AdminOrderFilter, string> = {
-  ALL: "全部",
-  HALL: "订单大厅",
-  ACTIVE: "正在进行",
-  REUPLOAD: "需重传",
-  HISTORY: "历史",
+  ALL: "All",
+  HALL: "Order Hall",
+  ACTIVE: "In Progress",
+  REUPLOAD: "Re-upload",
+  HISTORY: "History",
 };
 
 export function AdminOrdersClient() {
@@ -545,9 +545,9 @@ export function AdminOrdersClient() {
       }));
       setOrders(response.items);
       setPagination(response.pagination);
-      if (!silent) toast.success("订单数据已刷新");
+      if (!silent) toast.success("Order data refreshed");
     } catch (error) {
-      if (!silent) toast.error(error instanceof Error ? error.message : "刷新失败");
+      if (!silent) toast.error(error instanceof Error ? error.message : "Refresh failed");
     } finally {
       setLoading(false);
     }
@@ -571,22 +571,22 @@ export function AdminOrdersClient() {
   const historyCount = orders.filter((order) => historyOrderStatuses.includes(order.status)).length;
 
   return (
-    <AppFrame audience="admin" title="全部订单" subtitle="查看订单大厅、正在进行、需重传和历史订单。" onRefresh={() => refresh()}>
+    <AppFrame audience="admin" title="All Orders" subtitle="View order hall, in-progress, needs re-upload, and history orders." onRefresh={() => refresh()}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <Button variant="outline" onClick={() => refresh()} disabled={loading}><RefreshCwIcon data-icon="inline-start" />刷新</Button>
+        <Button variant="outline" onClick={() => refresh()} disabled={loading}><RefreshCwIcon data-icon="inline-start" />Refresh</Button>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-4">
-        <MetricCard title="订单大厅" value={hallCount} description="等待 worker 接取的订单" icon={ClipboardListIcon} tone="warning" />
-        <MetricCard title="正在进行" value={activeCount} description="已接取但未完成" icon={ShieldCheckIcon} tone="info" />
-        <MetricCard title="需重传" value={reuploadCount} description="worker 已退回等待客户重传" icon={AlertTriangleIcon} tone="warning" />
-        <MetricCard title="历史订单" value={historyCount} description="完成、取消、失败或超时" icon={DatabaseIcon} tone="brand" />
+        <MetricCard title="Order Hall" value={hallCount} description="Orders waiting for workers to accept" icon={ClipboardListIcon} tone="warning" />
+        <MetricCard title="In Progress" value={activeCount} description="Accepted but not completed" icon={ShieldCheckIcon} tone="info" />
+        <MetricCard title="Needs Re-upload" value={reuploadCount} description="Returned by worker, waiting for re-upload" icon={AlertTriangleIcon} tone="warning" />
+        <MetricCard title="History" value={historyCount} description="Completed, cancelled, failed, or expired" icon={DatabaseIcon} tone="brand" />
       </div>
 
       <Card className="mt-4 rounded-3xl bg-background shadow-sm">
         <CardHeader>
-          <CardTitle>订单列表</CardTitle>
-          <CardDescription>订单列表只展示订单状态与处理信息；二维码在接单方当前订单区域生成。</CardDescription>
+          <CardTitle>Order List</CardTitle>
+          <CardDescription>The order list shows status and processing info. QR codes are generated in the worker current order area.</CardDescription>
           <CardAction>{pagination ? `${filteredOrders.length} / ${pagination.total}` : filteredOrders.length}</CardAction>
         </CardHeader>
         <CardContent>
@@ -600,7 +600,7 @@ export function AdminOrdersClient() {
             </div>
             <div className="relative w-full lg:max-w-sm">
               <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="搜索订单号、CDK 或接单方" className="pl-9" />
+              <Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Search order number, CDK, or worker" className="pl-9" />
             </div>
           </div>
 
@@ -608,12 +608,12 @@ export function AdminOrdersClient() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>订单</TableHead>
-                  <TableHead>状态</TableHead>
+                  <TableHead>Order</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>CDK</TableHead>
-                  <TableHead>接单方</TableHead>
-                  <TableHead>时间</TableHead>
-                  <TableHead>备注</TableHead>
+                  <TableHead>Worker</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead>Notes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -628,26 +628,26 @@ export function AdminOrdersClient() {
                           <div className="font-semibold">{order.orderNo}</div>
                           <div className="mt-1 flex flex-wrap items-center gap-2">
                             {order.hasSessionCredential && <Badge variant="secondary">{order.upiExtractionStatus || "PENDING"}</Badge>}
-                            {order.qrIsUpi === false && <Badge variant="destructive"><AlertTriangleIcon data-icon="inline-start" />疑似非 UPI</Badge>}
-                            {qrRemainingText && <Badge variant={qrRemainingText === "已过期" ? "outline" : "secondary"}>二维码 {qrRemainingText}</Badge>}
+                            {order.qrIsUpi === false && <Badge variant="destructive"><AlertTriangleIcon data-icon="inline-start" />Possibly non-UPI</Badge>}
+                            {qrRemainingText && <Badge variant={qrRemainingText === "Expired" ? "outline" : "secondary"}>QR {qrRemainingText}</Badge>}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell><OrderStatusBadge status={order.status} language="zh" /></TableCell>
                       <TableCell>
                         {order.cdk ? (
-                          <div><div className="font-mono text-xs">{order.cdk.code}</div><div className="text-xs text-muted-foreground">可用 {order.cdk.availableCount}</div></div>
+                          <div><div className="font-mono text-xs">{order.cdk.code}</div><div className="text-xs text-muted-foreground">Available {order.cdk.availableCount}</div></div>
                         ) : (
-                          <div><Badge variant="secondary">扫码单</Badge><div className="mt-1 text-xs text-muted-foreground">{formatMoney(order.scanPrice ?? 0)}</div></div>
+                          <div><Badge variant="secondary">Scan order</Badge><div className="mt-1 text-xs text-muted-foreground">{formatMoney(order.scanPrice ?? 0)}</div></div>
                         )}
                       </TableCell>
-                      <TableCell>{displayWorker ? <div><div className="font-semibold">{displayWorker.displayName}</div><div className="text-xs text-muted-foreground">@{displayWorker.username}{isHistoryWorker ? " · 历史接单" : ""}</div></div> : <span className="text-muted-foreground">未接取</span>}</TableCell>
-                      <TableCell><div className="text-sm">{formatDateTime(order.createdAt)}</div><div className="text-xs text-muted-foreground">更新 {formatDateTime(order.updatedAt)}</div></TableCell>
+                      <TableCell>{displayWorker ? <div><div className="font-semibold">{displayWorker.displayName}</div><div className="text-xs text-muted-foreground">@{displayWorker.username}{isHistoryWorker ? " · Previous worker" : ""}</div></div> : <span className="text-muted-foreground">Not accepted</span>}</TableCell>
+                      <TableCell><div className="text-sm">{formatDateTime(order.createdAt)}</div><div className="text-xs text-muted-foreground">Updated {formatDateTime(order.updatedAt)}</div></TableCell>
                       <TableCell className="max-w-[260px] truncate">{order.problemReason || order.customerNote || "-"}</TableCell>
                     </TableRow>
                   );
                 })}
-                {filteredOrders.length === 0 && <TableRow><TableCell colSpan={6} className="h-40 text-center text-muted-foreground">暂无订单</TableCell></TableRow>}
+                {filteredOrders.length === 0 && <TableRow><TableCell colSpan={6} className="h-40 text-center text-muted-foreground">No orders</TableCell></TableRow>}
               </TableBody>
             </Table>
           </div>
@@ -673,7 +673,7 @@ export function AdminWorkersClient() {
   const [withdrawalPagination, setWithdrawalPagination] = useState<AdminPaginationMeta | null>(null);
   const [workerPriceDrafts, setWorkerPriceDrafts] = useState<Record<string, string>>({});
   const [workerUsername, setWorkerUsername] = useState("worker");
-  const [workerName, setWorkerName] = useState("接单员");
+  const [workerName, setWorkerName] = useState("Worker");
   const [workerUnitPrice, setWorkerUnitPrice] = useState("0.70");
   const [workerPayoutMode, setNewWorkerPayoutMode] = useState<"POSTPAID" | "PREPAID">("POSTPAID");
   const [workerBinanceUserId, setWorkerBinanceUserId] = useState("");
@@ -692,9 +692,9 @@ export function AdminWorkersClient() {
       setWithdrawals(nextWithdrawals.items);
       setWorkerPagination(nextWorkers.pagination);
       setWithdrawalPagination(nextWithdrawals.pagination);
-      if (!silent) toast.success("接单账号已刷新");
+      if (!silent) toast.success("Worker accounts refreshed");
     } catch (error) {
-      if (!silent) toast.error(error instanceof Error ? error.message : "刷新失败");
+      if (!silent) toast.error(error instanceof Error ? error.message : "Refresh failed");
     }
   }, [deferredWithdrawalSearch, deferredWorkerSearch, withdrawalPage, workerPage]);
 
@@ -706,9 +706,9 @@ export function AdminWorkersClient() {
       setWorkers((current) => [worker, ...current].slice(0, ADMIN_PAGE_SIZE));
       setWorkerPage(1);
       setCreateWorkerOpen(false);
-      toast.success("接单账号已创建");
+      toast.success("Worker account created");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "创建接单账号失败");
+      toast.error(error instanceof Error ? error.message : "Failed to create worker account");
     } finally {
       setLoading(false);
     }
@@ -716,13 +716,13 @@ export function AdminWorkersClient() {
 
   async function settleWorker(worker: AdminWorker) {
     if ((worker.unsettledCompleted ?? 0) <= 0) {
-      toast.info("该接单方暂无未结订单");
+      toast.info("This worker has no unsettled orders");
       return;
     }
     try {
       setLoading(true);
       const result = await apiFetch<{ settledCount: number; settledAmount: number }>("/api/admin/workers/" + worker.id + "/settle", { method: "POST" });
-      toast.success("已结单 " + result.settledCount + " 单，金额 " + formatMoney(result.settledAmount));
+      toast.success("Settled " + result.settledCount + " order(s), amount " + formatMoney(result.settledAmount));
       setWorkers((current) => current.map((item) => item.id === worker.id
         ? {
             ...item,
@@ -734,7 +734,7 @@ export function AdminWorkersClient() {
         : item));
       await refresh(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "结单失败");
+      toast.error(error instanceof Error ? error.message : "Settlement failed");
     } finally {
       setLoading(false);
     }
@@ -742,20 +742,20 @@ export function AdminWorkersClient() {
 
   async function offlineWorker(worker: AdminWorker) {
     if (worker.status !== "ONLINE") {
-      toast.info("该接单方当前已离线");
+      toast.info("This worker is already offline");
       return;
     }
     if (worker.activeOrder) {
-      toast.error(`该接单方有进行中订单 ${worker.activeOrder.orderNo}，完成或退回后才能下线`);
+      toast.error(`Worker has active order ${worker.activeOrder.orderNo}. Complete or return it before going offline.`);
       return;
     }
     try {
       setLoading(true);
       await apiFetch<PublicWorker>("/api/admin/workers/" + worker.id + "/offline", { method: "POST" });
-      toast.success(`已将 ${worker.displayName} 下线，并关闭自动接单`);
+      toast.success(`${worker.displayName} is now offline with auto-accept disabled`);
       await refresh(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "下线失败");
+      toast.error(error instanceof Error ? error.message : "Failed to go offline");
     } finally {
       setLoading(false);
     }
@@ -763,7 +763,7 @@ export function AdminWorkersClient() {
 
   async function disableWorkerAutoAccept(worker: AdminWorker) {
     if (!worker.autoAcceptEnabled) {
-      toast.info("该接单方自动接单已关闭");
+      toast.info("This worker auto-accept is already off");
       return;
     }
     try {
@@ -772,10 +772,10 @@ export function AdminWorkersClient() {
         method: "POST",
         body: JSON.stringify({ enabled: false }),
       });
-      toast.success(`已关闭 ${worker.displayName} 的自动接单`);
+      toast.success(`Disabled auto-accept for ${worker.displayName}`);
       await refresh(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "关闭自动接单失败");
+      toast.error(error instanceof Error ? error.message : "Failed to disable auto-accept");
     } finally {
       setLoading(false);
     }
@@ -789,7 +789,7 @@ export function AdminWorkersClient() {
         method: "POST",
         body: JSON.stringify({ unitPrice }),
       });
-      toast.success(`${worker.displayName} 单价已更新为 ${formatMoney(unitPrice)}`);
+      toast.success(`${worker.displayName} unit price updated to ${formatMoney(unitPrice)}`);
       setWorkerPriceDrafts((current) => {
         const next = { ...current };
         delete next[worker.id];
@@ -797,7 +797,7 @@ export function AdminWorkersClient() {
       });
       await refresh(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "修改单价失败");
+      toast.error(error instanceof Error ? error.message : "Failed to update unit price");
     } finally {
       setLoading(false);
     }
@@ -810,10 +810,10 @@ export function AdminWorkersClient() {
         method: "POST",
         body: JSON.stringify({ disabled }),
       });
-      toast.success(disabled ? `${worker.displayName} 已停用` : `${worker.displayName} 已启用`);
+      toast.success(disabled ? `${worker.displayName} disabled` : `${worker.displayName} enabled`);
       await refresh(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : (disabled ? "停用账号失败" : "启用账号失败"));
+      toast.error(error instanceof Error ? error.message : (disabled ? "Failed to disable account" : "Failed to enable account"));
     } finally {
       setLoading(false);
     }
@@ -826,28 +826,28 @@ export function AdminWorkersClient() {
         method: "POST",
         body: JSON.stringify({ payoutMode }),
       });
-      toast.success(`${worker.displayName} 已切换为${payoutMode === "PREPAID" ? "预付费" : "后付费"}模式`);
+      toast.success(`${worker.displayName} switched to ${payoutMode === "PREPAID" ? "prepaid" : "postpaid"} mode`);
       await refresh(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "切换付款模式失败");
+      toast.error(error instanceof Error ? error.message : "Failed to switch payout mode");
     } finally {
       setLoading(false);
     }
   }
 
   async function advanceWorker(worker: AdminWorker) {
-    const amount = window.prompt(`给 ${worker.displayName} 记录预支金额（USD）`, "10.00");
+    const amount = window.prompt(`Record advance amount (USD) for ${worker.displayName}`, "10.00");
     if (!amount) return;
     try {
       setLoading(true);
       await apiFetch<WorkerWalletSummary>("/api/admin/workers/" + worker.id + "/advance", {
         method: "POST",
-        body: JSON.stringify({ amount, note: "管理员预支款" }),
+        body: JSON.stringify({ amount, note: "Admin advance" }),
       });
-      toast.success(`已给 ${worker.displayName} 记录预支款 ${formatMoney(amount)}`);
+      toast.success(`Recorded advance ${formatMoney(amount)} for ${worker.displayName}`);
       await refresh(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "记录预支款失败");
+      toast.error(error instanceof Error ? error.message : "Failed to record advance");
     } finally {
       setLoading(false);
     }
@@ -857,17 +857,17 @@ export function AdminWorkersClient() {
     try {
       setLoading(true);
       await apiFetch<PublicWorkerWithdrawalRequest>("/api/admin/withdrawals/" + request.id + "/paid", { method: "POST" });
-      toast.success("提现申请已标记为已付款");
+      toast.success("Withdrawal marked as paid");
       await refresh(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "处理提现失败");
+      toast.error(error instanceof Error ? error.message : "Failed to process withdrawal");
     } finally {
       setLoading(false);
     }
   }
 
   async function rejectWithdrawal(request: PublicWorkerWithdrawalRequest) {
-    const adminNote = window.prompt("拒绝原因", request.adminNote || "");
+    const adminNote = window.prompt("Rejection reason", request.adminNote || "");
     if (adminNote === null) return;
     try {
       setLoading(true);
@@ -875,10 +875,10 @@ export function AdminWorkersClient() {
         method: "POST",
         body: JSON.stringify({ adminNote }),
       });
-      toast.success("提现申请已拒绝");
+      toast.success("Withdrawal rejected");
       await refresh(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "拒绝提现失败");
+      toast.error(error instanceof Error ? error.message : "Failed to reject withdrawal");
     } finally {
       setLoading(false);
     }
@@ -894,23 +894,23 @@ export function AdminWorkersClient() {
   const pendingWithdrawalAmount = pendingWithdrawals.reduce((sum, request) => sum + request.amount, 0);
 
   return (
-    <AppFrame audience="admin" title="接单账号" subtitle="创建 Telegram worker、设置单价，并结算已完成订单。" onRefresh={() => refresh()}>
+    <AppFrame audience="admin" title="Worker Accounts" subtitle="Create Telegram workers, set unit prices, and settle completed orders." onRefresh={() => refresh()}>
       <div className="mb-4 grid gap-4 lg:grid-cols-2">
         <Card className="rounded-3xl bg-background shadow-sm">
           <CardHeader>
-            <CardTitle>接单账号 / 在线接单方</CardTitle>
-            <CardDescription>账号总数和当前在线人数统一显示。</CardDescription>
+            <CardTitle>Worker Accounts / Online Workers</CardTitle>
+            <CardDescription>Total accounts and current online count displayed together.</CardDescription>
             <CardAction>
               <Button size="sm" onClick={() => setCreateWorkerOpen(true)}>
                 <UserPlusIcon data-icon="inline-start" />
-                创建接单账号
+                Create Worker Account
               </Button>
             </CardAction>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-muted/40 p-4"><div className="text-sm text-muted-foreground">接单账号</div><div className="mt-2 text-4xl font-semibold tracking-tight">{workerPagination?.total ?? workers.length}</div></div>
-              <div className="rounded-2xl bg-muted/40 p-4"><div className="text-sm text-muted-foreground">在线接单方</div><div className="mt-2 text-4xl font-semibold tracking-tight">{onlineWorkers}</div></div>
+              <div className="rounded-2xl bg-muted/40 p-4"><div className="text-sm text-muted-foreground">Workers</div><div className="mt-2 text-4xl font-semibold tracking-tight">{workerPagination?.total ?? workers.length}</div></div>
+              <div className="rounded-2xl bg-muted/40 p-4"><div className="text-sm text-muted-foreground">Online Workers</div><div className="mt-2 text-4xl font-semibold tracking-tight">{onlineWorkers}</div></div>
             </div>
           </CardContent>
         </Card>
@@ -919,31 +919,31 @@ export function AdminWorkersClient() {
       <Sheet open={createWorkerOpen} onOpenChange={setCreateWorkerOpen}>
         <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
-            <SheetTitle>创建接单账号</SheetTitle>
-            <SheetDescription>已关闭账号密码登录；接单方只通过 Telegram Bot 登录。</SheetDescription>
+            <SheetTitle>Create Worker Account</SheetTitle>
+            <SheetDescription>Password login is disabled. Workers sign in via Telegram Bot only.</SheetDescription>
           </SheetHeader>
           <form onSubmit={createWorker} className="flex flex-col gap-5">
             <FieldGroup>
-              <Field><FieldLabel htmlFor="worker-username">账号标识</FieldLabel><Input id="worker-username" value={workerUsername} onChange={(event) => setWorkerUsername(event.target.value)} /></Field>
-              <Field><FieldLabel htmlFor="worker-name">昵称</FieldLabel><Input id="worker-name" value={workerName} onChange={(event) => setWorkerName(event.target.value)} /></Field>
-              <Field><FieldLabel htmlFor="worker-unit-price">单价（USD/单）</FieldLabel><Input id="worker-unit-price" inputMode="decimal" value={workerUnitPrice} onChange={(event) => setWorkerUnitPrice(event.target.value)} placeholder="0.70" /><FieldDescription>完成订单时会保存当时单价，后续改价不影响历史。</FieldDescription></Field>
+              <Field><FieldLabel htmlFor="worker-username">Username</FieldLabel><Input id="worker-username" value={workerUsername} onChange={(event) => setWorkerUsername(event.target.value)} /></Field>
+              <Field><FieldLabel htmlFor="worker-name">Display Name</FieldLabel><Input id="worker-name" value={workerName} onChange={(event) => setWorkerName(event.target.value)} /></Field>
+              <Field><FieldLabel htmlFor="worker-unit-price">Unit Price (USD/order)</FieldLabel><Input id="worker-unit-price" inputMode="decimal" value={workerUnitPrice} onChange={(event) => setWorkerUnitPrice(event.target.value)} placeholder="0.70" /><FieldDescription>The unit price at order completion is recorded. Future price changes do not affect history.</FieldDescription></Field>
               <Field>
-                <FieldLabel htmlFor="worker-binance">Binance 用户 ID</FieldLabel>
-                <Input id="worker-binance" value={workerBinanceUserId} onChange={(event) => setWorkerBinanceUserId(event.target.value)} placeholder="可先留空，worker 登录后会弹窗提醒绑定" />
+                <FieldLabel htmlFor="worker-binance">Binance User ID</FieldLabel>
+                <Input id="worker-binance" value={workerBinanceUserId} onChange={(event) => setWorkerBinanceUserId(event.target.value)} placeholder="Leave empty; worker will be prompted to bind on login" />
               </Field>
               <Field>
                 <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/30 p-3">
                   <div>
-                    <FieldLabel>预付费模式</FieldLabel>
-                    <FieldDescription>开启后可先记录预支款，钱包余额会从负数开始，完成订单后自动抵扣。</FieldDescription>
+                    <FieldLabel>Prepaid Mode</FieldLabel>
+                    <FieldDescription>When enabled, advance payments can be recorded. Wallet balance starts negative and is offset by completed orders.</FieldDescription>
                   </div>
                   <Switch checked={workerPayoutMode === "PREPAID"} onCheckedChange={(checked) => setNewWorkerPayoutMode(checked ? "PREPAID" : "POSTPAID")} />
                 </div>
               </Field>
-              <Field><FieldLabel htmlFor="worker-telegram-id">Telegram ID</FieldLabel><Input id="worker-telegram-id" value={workerTelegramId} onChange={(event) => setWorkerTelegramId(event.target.value)} placeholder="例如 1000000000，可选" /></Field>
-              <Field><FieldLabel htmlFor="worker-telegram-username">Telegram 用户名</FieldLabel><Input id="worker-telegram-username" value={workerTelegramUsername} onChange={(event) => setWorkerTelegramUsername(event.target.value)} placeholder="@username，可选" /><FieldDescription>至少填写 Telegram ID 或用户名之一，worker 才能用 Bot 登录。</FieldDescription></Field>
+              <Field><FieldLabel htmlFor="worker-telegram-id">Telegram ID</FieldLabel><Input id="worker-telegram-id" value={workerTelegramId} onChange={(event) => setWorkerTelegramId(event.target.value)} placeholder="e.g. 1000000000, optional" /></Field>
+              <Field><FieldLabel htmlFor="worker-telegram-username">Telegram Username</FieldLabel><Input id="worker-telegram-username" value={workerTelegramUsername} onChange={(event) => setWorkerTelegramUsername(event.target.value)} placeholder="@username, optional" /><FieldDescription>At least one of Telegram ID or username is required for Bot login.</FieldDescription></Field>
             </FieldGroup>
-            <Button type="submit" disabled={loading}><UserPlusIcon data-icon="inline-start" />创建账号</Button>
+            <Button type="submit" disabled={loading}><UserPlusIcon data-icon="inline-start" />Create Account</Button>
           </form>
         </SheetContent>
       </Sheet>
@@ -956,28 +956,28 @@ export function AdminWorkersClient() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <TabsList className="flex w-full flex-wrap justify-start rounded-2xl p-1 sm:w-auto">
             <TabsTrigger value="workers" className="min-w-32">
-              接单账号 {workerPagination?.total ?? workers.length}
+              Workers {workerPagination?.total ?? workers.length}
             </TabsTrigger>
             <TabsTrigger value="withdrawals" className="min-w-32">
-              提现申请 {withdrawalPagination?.total ?? withdrawals.length}
+              Withdrawals {withdrawalPagination?.total ?? withdrawals.length}
             </TabsTrigger>
           </TabsList>
           <Button variant="outline" size="sm" onClick={() => refresh()} disabled={loading}>
             <RefreshCwIcon data-icon="inline-start" />
-            刷新
+            Refresh
           </Button>
         </div>
 
         <TabsContent value="workers">
         <Card className="rounded-3xl bg-background shadow-sm">
-          <CardHeader><CardTitle>接单账号列表</CardTitle><CardDescription>查看单价、在线状态、完成金额，并对未结完成单执行结单。</CardDescription></CardHeader>
+          <CardHeader><CardTitle>Worker Account List</CardTitle><CardDescription>View unit price, online status, completed amounts, and settle unsettled orders.</CardDescription></CardHeader>
           <CardContent>
             <div className="mb-3 flex items-center gap-2">
               <SearchIcon className="size-4 text-muted-foreground" />
-              <Input value={workerSearch} onChange={(event) => { setWorkerSearch(event.target.value); setWorkerPage(1); }} placeholder="搜索账号 / Telegram / Binance UID" />
+              <Input value={workerSearch} onChange={(event) => { setWorkerSearch(event.target.value); setWorkerPage(1); }} placeholder="Search account / Telegram / Binance UID" />
             </div>
             <div className="overflow-hidden rounded-3xl border border-border">
-              <Table><TableHeader><TableRow><TableHead>账号</TableHead><TableHead>Telegram</TableHead><TableHead>单价</TableHead><TableHead>模式</TableHead><TableHead>钱包</TableHead><TableHead>状态</TableHead><TableHead>自动接单</TableHead><TableHead>完成/记录</TableHead><TableHead>未结记录</TableHead><TableHead>已结</TableHead><TableHead>最后在线</TableHead><TableHead className="text-right">操作</TableHead></TableRow></TableHeader>
+              <Table><TableHeader><TableRow><TableHead>Account</TableHead><TableHead>Telegram</TableHead><TableHead>Unit Price</TableHead><TableHead>Mode</TableHead><TableHead>Wallet</TableHead><TableHead>Status</TableHead><TableHead>Auto Accept</TableHead><TableHead>Completed/Records</TableHead><TableHead>Unsettled</TableHead><TableHead>Settled</TableHead><TableHead>Last Seen</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader>
                 <TableBody>
                   {workers.map((worker) => (
                     <TableRow key={worker.id}>
@@ -987,7 +987,7 @@ export function AdminWorkersClient() {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">{worker.telegramUserId || "-"}</div>
-                        <div className="text-xs text-muted-foreground">{worker.telegramUsername ? "@" + worker.telegramUsername : "未绑定"}</div>
+                        <div className="text-xs text-muted-foreground">{worker.telegramUsername ? "@" + worker.telegramUsername : "Not bound"}</div>
                       </TableCell>
                       <TableCell>
                         <div className="flex min-w-32 items-center gap-2">
@@ -1003,55 +1003,55 @@ export function AdminWorkersClient() {
                             onClick={() => updateWorkerUnitPrice(worker)}
                             disabled={loading || (workerPriceDrafts[worker.id] ?? Number(worker.unitPrice ?? 0).toFixed(2)) === Number(worker.unitPrice ?? 0).toFixed(2)}
                           >
-                            保存
+                            Save
                           </Button>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1">
-                          <Badge variant={worker.payoutMode === "PREPAID" ? "secondary" : "outline"}>{worker.payoutMode === "PREPAID" ? "预付费" : "后付费"}</Badge>
+                          <Badge variant={worker.payoutMode === "PREPAID" ? "secondary" : "outline"}>{worker.payoutMode === "PREPAID" ? "Prepaid" : "Postpaid"}</Badge>
                           <button className="text-left text-xs text-muted-foreground underline" onClick={() => setWorkerPayoutMode(worker, worker.payoutMode === "PREPAID" ? "POSTPAID" : "PREPAID")} disabled={loading}>
-                            切换
+                            Switch
                           </button>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="font-semibold">{formatBalance(worker.wallet?.balance)}</div>
-                        <div className="text-xs text-muted-foreground">可提 {formatBalance(worker.wallet?.availableBalance)}</div>
-                        <div className="text-xs text-muted-foreground">Binance: {worker.binanceUserId || "未绑定"}</div>
+                        <div className="text-xs text-muted-foreground">Withdrawable {formatBalance(worker.wallet?.availableBalance)}</div>
+                        <div className="text-xs text-muted-foreground">Binance: {worker.binanceUserId || "Not bound"}</div>
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col items-start gap-1">
                           <WorkerStatusBadge status={worker.status} />
-                          {worker.isDisabled && <Badge variant="destructive">已停用</Badge>}
+                          {worker.isDisabled && <Badge variant="destructive">Disabled</Badge>}
                         </div>
-                        {worker.activeOrder && <div className="mt-1 text-xs text-muted-foreground">进行中：{worker.activeOrder.orderNo}</div>}
+                        {worker.activeOrder && <div className="mt-1 text-xs text-muted-foreground">Active: {worker.activeOrder.orderNo}</div>}
                       </TableCell>
-                      <TableCell>{worker.autoAcceptEnabled ? "开启" : "关闭"}</TableCell>
+                      <TableCell>{worker.autoAcceptEnabled ? "On" : "Off"}</TableCell>
                       <TableCell>{worker.completedCount ?? 0} / {worker._count?.records ?? 0}</TableCell>
-                      <TableCell><div className="font-semibold">{formatMoney(worker.unsettledAmount)}</div><div className="text-xs text-muted-foreground">{worker.unsettledCompleted ?? 0} 单</div></TableCell>
-                      <TableCell><div>{formatMoney(worker.settledAmount)}</div><div className="text-xs text-muted-foreground">{worker.settledCompleted ?? 0} 单</div></TableCell>
+                      <TableCell><div className="font-semibold">{formatMoney(worker.unsettledAmount)}</div><div className="text-xs text-muted-foreground">{worker.unsettledCompleted ?? 0} orders</div></TableCell>
+                      <TableCell><div>{formatMoney(worker.settledAmount)}</div><div className="text-xs text-muted-foreground">{worker.settledCompleted ?? 0} orders</div></TableCell>
                       <TableCell>{formatDateTime(worker.lastSeenAt)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex flex-wrap justify-end gap-2">
-                          <Button variant="outline" size="sm" onClick={() => disableWorkerAutoAccept(worker)} disabled={loading || !worker.autoAcceptEnabled}>关闭自动</Button>
-                          <Button variant="outline" size="sm" onClick={() => offlineWorker(worker)} disabled={loading || worker.status !== "ONLINE" || Boolean(worker.activeOrder)} title={worker.activeOrder ? "有进行中订单，暂不能下线" : undefined}>下线</Button>
+                          <Button variant="outline" size="sm" onClick={() => disableWorkerAutoAccept(worker)} disabled={loading || !worker.autoAcceptEnabled}>Disable Auto</Button>
+                          <Button variant="outline" size="sm" onClick={() => offlineWorker(worker)} disabled={loading || worker.status !== "ONLINE" || Boolean(worker.activeOrder)} title={worker.activeOrder ? "Has active order, cannot go offline" : undefined}>Offline</Button>
                           <Button
                             variant={worker.isDisabled ? "outline" : "destructive"}
                             size="sm"
                             onClick={() => setWorkerDisabled(worker, !worker.isDisabled)}
                             disabled={loading || Boolean(worker.activeOrder)}
-                            title={worker.activeOrder ? "有进行中订单，暂不能停用" : undefined}
+                            title={worker.activeOrder ? "Has active order, cannot disable" : undefined}
                           >
-                            {worker.isDisabled ? "启用" : "停用"}
+                            {worker.isDisabled ? "Enable" : "Disable"}
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => advanceWorker(worker)} disabled={loading}>预支</Button>
-                          <Button variant="outline" size="sm" onClick={() => settleWorker(worker)} disabled={loading || worker.payoutMode === "PREPAID" || (worker.unsettledCompleted ?? 0) <= 0} title={worker.payoutMode === "PREPAID" ? "预付费模式通过钱包负余额自动抵扣，不使用旧结单" : undefined}>结单</Button>
+                          <Button variant="outline" size="sm" onClick={() => advanceWorker(worker)} disabled={loading}>Advance</Button>
+                          <Button variant="outline" size="sm" onClick={() => settleWorker(worker)} disabled={loading || worker.payoutMode === "PREPAID" || (worker.unsettledCompleted ?? 0) <= 0} title={worker.payoutMode === "PREPAID" ? "Prepaid mode auto-offsets via negative wallet balance; legacy settlement not used" : undefined}>Settle</Button>
                         </div>
                       </TableCell>
                     </TableRow>
                   ))}
-                  {workers.length === 0 && <TableRow><TableCell colSpan={12} className="h-28 text-center text-muted-foreground">暂无接单账号</TableCell></TableRow>}
+                  {workers.length === 0 && <TableRow><TableCell colSpan={12} className="h-28 text-center text-muted-foreground">No worker accounts</TableCell></TableRow>}
                 </TableBody>
               </Table>
             </div>
@@ -1063,28 +1063,28 @@ export function AdminWorkersClient() {
         <TabsContent value="withdrawals">
       <Card className="rounded-3xl bg-background shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><WalletIcon className="size-5 text-muted-foreground" />提现申请</CardTitle>
+          <CardTitle className="flex items-center gap-2"><WalletIcon className="size-5 text-muted-foreground" />Withdrawal Requests</CardTitle>
           <CardDescription>
-            当前页待处理 {pendingWithdrawals.length} 笔 / {formatBalance(pendingWithdrawalAmount)}。标记已付款后会写入钱包流水并扣减余额；拒绝不会扣款。
+            Pending on this page: {pendingWithdrawals.length} / {formatBalance(pendingWithdrawalAmount)}. Marking paid writes to wallet ledger and deducts balance; rejecting does not deduct.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-3 flex items-center gap-2">
             <SearchIcon className="size-4 text-muted-foreground" />
-            <Input value={withdrawalSearch} onChange={(event) => { setWithdrawalSearch(event.target.value); setWithdrawalPage(1); }} placeholder="搜索接单方 / Binance UID / 备注" />
+            <Input value={withdrawalSearch} onChange={(event) => { setWithdrawalSearch(event.target.value); setWithdrawalPage(1); }} placeholder="Search worker / Binance UID / notes" />
           </div>
           <div className="overflow-hidden rounded-3xl border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>接单方</TableHead>
-                  <TableHead>金额</TableHead>
+                  <TableHead>Worker</TableHead>
+                  <TableHead>Amount</TableHead>
                   <TableHead>Binance UID</TableHead>
-                  <TableHead>状态</TableHead>
-                  <TableHead>申请时间</TableHead>
-                  <TableHead>处理时间</TableHead>
-                  <TableHead>备注</TableHead>
-                  <TableHead className="text-right">操作</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Requested</TableHead>
+                  <TableHead>Processed</TableHead>
+                  <TableHead>Notes</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1098,7 +1098,7 @@ export function AdminWorkersClient() {
                     <TableCell>
                       <div className="font-mono text-xs">{request.binanceUserIdSnapshot}</div>
                       {request.worker?.binanceUserId && request.worker.binanceUserId !== request.binanceUserIdSnapshot ? (
-                        <div className="mt-1 text-xs text-warning">当前 UID：{request.worker.binanceUserId}</div>
+                        <div className="mt-1 text-xs text-warning">Current UID: {request.worker.binanceUserId}</div>
                       ) : null}
                     </TableCell>
                     <TableCell><Badge variant={withdrawalStatusBadgeVariant(request.status)}>{withdrawalStatusText(request.status)}</Badge></TableCell>
@@ -1106,17 +1106,17 @@ export function AdminWorkersClient() {
                     <TableCell>{formatDateTime(request.processedAt)}</TableCell>
                     <TableCell className="max-w-[280px]">
                       <div className="truncate text-sm">{request.note || "-"}</div>
-                      {request.adminNote ? <div className="mt-1 truncate text-xs text-muted-foreground">管理员：{request.adminNote}</div> : null}
+                      {request.adminNote ? <div className="mt-1 truncate text-xs text-muted-foreground">Admin: {request.adminNote}</div> : null}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex flex-wrap justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => markWithdrawalPaid(request)} disabled={loading || request.status !== "PENDING"}>已付款</Button>
-                        <Button variant="outline" size="sm" onClick={() => rejectWithdrawal(request)} disabled={loading || request.status !== "PENDING"}>拒绝</Button>
+                        <Button variant="outline" size="sm" onClick={() => markWithdrawalPaid(request)} disabled={loading || request.status !== "PENDING"}>Paid</Button>
+                        <Button variant="outline" size="sm" onClick={() => rejectWithdrawal(request)} disabled={loading || request.status !== "PENDING"}>Reject</Button>
                       </div>
                     </TableCell>
                   </TableRow>
                 ))}
-                {withdrawals.length === 0 && <TableRow><TableCell colSpan={8} className="h-28 text-center text-muted-foreground">暂无提现申请</TableCell></TableRow>}
+                {withdrawals.length === 0 && <TableRow><TableCell colSpan={8} className="h-28 text-center text-muted-foreground">No withdrawal requests</TableCell></TableRow>}
               </TableBody>
             </Table>
           </div>
@@ -1160,9 +1160,9 @@ export function AdminProxiesClient() {
       setProxyListText((data.editableProxyList || []).join("\n"));
       setExpectedCountry(data.expectedCountry || "JP");
       setSelection(data.selection);
-      if (!silent) toast.success("代理列表已刷新");
+      if (!silent) toast.success("Proxy list refreshed");
     } catch (error) {
-      if (!silent) toast.error(error instanceof Error ? error.message : "刷新代理列表失败");
+      if (!silent) toast.error(error instanceof Error ? error.message : "Failed to refresh proxy list");
     } finally {
       setLoading(false);
     }
@@ -1192,10 +1192,10 @@ export function AdminProxiesClient() {
         body: JSON.stringify({ pool: proxyPool }),
       });
       setCheckResult(result);
-      if (result.failed > 0) toast.warning(`代理检测完成：${result.ok}/${result.total} 可用`);
-      else toast.success(`代理检测完成：${result.ok}/${result.total} 可用`);
+      if (result.failed > 0) toast.warning(`Proxy check done: ${result.ok}/${result.total} available`);
+      else toast.success(`Proxy check done: ${result.ok}/${result.total} available`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "代理检测失败");
+      toast.error(error instanceof Error ? error.message : "Proxy check failed");
     } finally {
       setChecking(false);
     }
@@ -1210,10 +1210,10 @@ export function AdminProxiesClient() {
       });
       setCheckResult((current) => mergeProxyCheckSummary(current, result));
       const first = result.results[0];
-      if (first?.ok) toast.success(`代理 #${proxy.index + 1} 检测可用`);
-      else toast.warning(`代理 #${proxy.index + 1} 检测异常`);
+      if (first?.ok) toast.success(`Proxy #${proxy.index + 1} is available`);
+      else toast.warning(`Proxy #${proxy.index + 1} has issues`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "代理检测失败");
+      toast.error(error instanceof Error ? error.message : "Proxy check failed");
     } finally {
       setCheckingProxyId(null);
     }
@@ -1230,9 +1230,9 @@ export function AdminProxiesClient() {
       setProxyListText((data.editableProxyList || []).join("\n"));
       setExpectedCountry(data.expectedCountry || "JP");
       setSelection(data.selection);
-      toast.success(data.selection.mode === "AUTO" ? "已切换为自动轮询代理" : "已切换当前代理");
+      toast.success(data.selection.mode === "AUTO" ? "Switched to auto-rotation" : "Current proxy switched");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "保存代理选择失败");
+      toast.error(error instanceof Error ? error.message : "Failed to save proxy selection");
     } finally {
       setLoading(false);
     }
@@ -1253,7 +1253,7 @@ export function AdminProxiesClient() {
       if (action === "add") setNewProxyUrl("");
       toast.success(successMessage);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "保存代理池失败");
+      toast.error(error instanceof Error ? error.message : "Failed to save proxy pool");
     } finally {
       setLoading(false);
     }
@@ -1274,15 +1274,15 @@ export function AdminProxiesClient() {
   const okCount = checkResult?.ok ?? 0;
   const failedCount = checkResult?.failed ?? 0;
   const selectedProxy = selection?.selectedProxyId ? proxies.find((proxy) => proxy.id === selection.selectedProxyId) : null;
-  const selectionLabel = selection?.mode === "MANUAL" && selectedProxy ? `#${selectedProxy.index + 1}` : "自动轮询";
+  const selectionLabel = selection?.mode === "MANUAL" && selectedProxy ? `#${selectedProxy.index + 1}` : "Auto Rotation";
 
   return (
-    <AppFrame audience="admin" title="代理列表" subtitle="公共提取和 Premium 提取使用独立代理池，可分别检测和选择当前代理。" onRefresh={() => refresh()}>
+    <AppFrame audience="admin" title="Proxy List" subtitle="Public and Premium extraction use separate proxy pools, each with independent detection and selection." onRefresh={() => refresh()}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => refresh()} disabled={loading}><RefreshCwIcon data-icon="inline-start" />刷新列表</Button>
-          <Button variant={selection?.mode === "AUTO" ? "default" : "outline"} onClick={() => saveProxySelection("AUTO")} disabled={loading}>自动轮询</Button>
-          <Button onClick={checkProxies} disabled={checking || proxies.length === 0}><ActivityIcon data-icon="inline-start" />{checking ? "检测中..." : "检测代理"}</Button>
+          <Button variant="outline" onClick={() => refresh()} disabled={loading}><RefreshCwIcon data-icon="inline-start" />Refresh List</Button>
+          <Button variant={selection?.mode === "AUTO" ? "default" : "outline"} onClick={() => saveProxySelection("AUTO")} disabled={loading}>Auto Rotation</Button>
+          <Button onClick={checkProxies} disabled={checking || proxies.length === 0}><ActivityIcon data-icon="inline-start" />{checking ? "Checking..." : "Check Proxies"}</Button>
         </div>
       </div>
 
@@ -1290,9 +1290,9 @@ export function AdminProxiesClient() {
         <CardContent className="pt-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="font-semibold">代理池</div>
+              <div className="font-semibold">Proxy Pool</div>
               <p className="mt-1 text-sm text-muted-foreground">
-                当前查看：{proxyPool === "premium" ? "Premium 提取代理池" : "公共提取代理池"}。两个池子的当前代理选择互不影响。
+                Viewing: {proxyPool === "premium" ? "Premium extraction proxy pool" : "Public extraction proxy pool"}. Pool selections are independent.
               </p>
             </div>
             <div className="flex rounded-full border border-border bg-muted/50 p-1 text-sm">
@@ -1301,14 +1301,14 @@ export function AdminProxiesClient() {
                 onClick={() => selectProxyPool("public")}
                 className={cn("rounded-full px-4 py-1.5 font-medium transition", proxyPool === "public" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
               >
-                公共代理池
+                Public Pool
               </button>
               <button
                 type="button"
                 onClick={() => selectProxyPool("premium")}
                 className={cn("rounded-full px-4 py-1.5 font-medium transition", proxyPool === "premium" ? "bg-brand text-white shadow-sm" : "text-muted-foreground hover:text-foreground")}
               >
-                Premium 代理池
+                Premium Pool
               </button>
             </div>
           </div>
@@ -1317,15 +1317,15 @@ export function AdminProxiesClient() {
 
       <Card className="mb-4 rounded-3xl bg-background shadow-sm">
         <CardHeader>
-          <CardTitle>编辑代理池</CardTitle>
+          <CardTitle>Edit Proxy Pool</CardTitle>
           <CardDescription>
-            保存后会写入数据库配置并立即生效，不需要改 .env；添加/删除/批量保存后当前代理会自动切回自动轮询，避免索引错位。
+            Changes are saved to the database immediately. After add/delete/bulk save, the current proxy auto-switches to rotation to avoid index mismatch.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
           <div className="rounded-3xl border border-border p-4">
-            <div className="font-semibold">添加单个代理</div>
-            <p className="mt-1 text-sm text-muted-foreground">支持 socks5://、http://、https://；不写协议会按 socks5:// 处理。</p>
+            <div className="font-semibold">Add Single Proxy</div>
+            <p className="mt-1 text-sm text-muted-foreground">Supports socks5://, http://, https://. No protocol defaults to socks5://.</p>
             <div className="mt-3 flex flex-col gap-2 sm:flex-row">
               <Input
                 value={newProxyUrl}
@@ -1336,10 +1336,10 @@ export function AdminProxiesClient() {
               />
               <Button
                 type="button"
-                onClick={() => mutateProxyPool("add", { proxyUrl: newProxyUrl }, "代理已添加")}
+                onClick={() => mutateProxyPool("add", { proxyUrl: newProxyUrl }, "Proxy added")}
                 disabled={loading || !newProxyUrl.trim()}
               >
-                <PlusIcon data-icon="inline-start" />添加
+                <PlusIcon data-icon="inline-start" />Add
               </Button>
             </div>
           </div>
@@ -1347,16 +1347,15 @@ export function AdminProxiesClient() {
           <div className="rounded-3xl border border-border p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <div className="font-semibold">批量编辑</div>
-                <p className="mt-1 text-sm text-muted-foreground">一行一个代理；保存会替换当前代理池。</p>
+                <div className="font-semibold">Bulk Edit</div>
+                <p className="mt-1 text-sm text-muted-foreground">One proxy per line. Saving replaces the current pool.</p>
               </div>
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => mutateProxyPool("replace", { proxyList: proxyListText }, "代理池已保存")}
-                disabled={loading}
+                onClick={() => mutateProxyPool("replace", { proxyList: proxyListText }, "Proxy pool saved")}                disabled={loading}
               >
-                <SaveIcon data-icon="inline-start" />保存
+                <SaveIcon data-icon="inline-start" />Save
               </Button>
             </div>
             <Textarea
@@ -1371,36 +1370,36 @@ export function AdminProxiesClient() {
       </Card>
 
       <div className="grid gap-4 xl:grid-cols-4">
-        <MetricCard title="代理数量" value={proxyPagination?.total ?? proxies.length} description={proxyPool === "premium" ? "来自 PREMIUM_UPSTREAM_PROXY_LIST / PREMIUM_UPI_PROXY_LIST / PREMIUM_UPSTREAM_PROXY" : "来自 UPSTREAM_PROXY_LIST / UPI_PROXY_LIST / UPSTREAM_PROXY"} icon={Globe2Icon} tone="brand" />
-        <MetricCard title="当前策略" value={selectionLabel} description={selection?.mode === "MANUAL" && selectedProxy ? selectedProxy.redactedUrl : "每次生成按列表轮询；失败会自动尝试其它代理"} icon={ShieldCheckIcon} tone="info" />
-        <MetricCard title="检测可用" value={checkResult ? okCount : "-"} description={`预期出口国家：${expectedCountry}`} icon={CheckCircle2Icon} tone="success" />
-        <MetricCard title="检测失败" value={checkResult ? failedCount : "-"} description={checkResult ? `检测时间：${formatDateTime(checkResult.checkedAt)}` : "点击检测代理后显示"} icon={XCircleIcon} tone="warning" />
+        <MetricCard title="Proxy Count" value={proxyPagination?.total ?? proxies.length} description={proxyPool === "premium" ? "From PREMIUM_UPSTREAM_PROXY_LIST / PREMIUM_UPI_PROXY_LIST / PREMIUM_UPSTREAM_PROXY" : "From UPSTREAM_PROXY_LIST / UPI_PROXY_LIST / UPSTREAM_PROXY"} icon={Globe2Icon} tone="brand" />
+        <MetricCard title="Current Strategy" value={selectionLabel} description={selection?.mode === "MANUAL" && selectedProxy ? selectedProxy.redactedUrl : "Rotates through list on each generation; failures auto-try other proxies"} icon={ShieldCheckIcon} tone="info" />
+        <MetricCard title="Available" value={checkResult ? okCount : "-"} description={`Expected exit country: ${expectedCountry}`} icon={CheckCircle2Icon} tone="success" />
+        <MetricCard title="Failed" value={checkResult ? failedCount : "-"} description={checkResult ? `Check time: ${formatDateTime(checkResult.checkedAt)}` : "Shown after running proxy check"} icon={XCircleIcon} tone="warning" />
       </div>
 
       <Card className="mt-4 rounded-3xl bg-background shadow-sm">
         <CardHeader>
-          <CardTitle>{proxyPool === "premium" ? "Premium 提取代理" : "公共提取代理"}</CardTitle>
-          <CardDescription>检测会验证出口 IP、国家，以及 ChatGPT / Stripe / Telegram 基础连通性；代理密码不会展示。</CardDescription>
-          <CardAction>{checkResult ? `${okCount} / ${checkResult.total}` : `${proxies.length} 个`}</CardAction>
+          <CardTitle>{proxyPool === "premium" ? "Premium Extraction Proxies" : "Public Extraction Proxies"}</CardTitle>
+          <CardDescription>Checks verify exit IP, country, and basic connectivity to ChatGPT / Stripe / Telegram. Proxy passwords are not shown.</CardDescription>
+          <CardAction>{checkResult ? `${okCount} / ${checkResult.total}` : `${proxies.length} proxies`}</CardAction>
         </CardHeader>
         <CardContent>
           <div className="mb-3 flex items-center gap-2">
             <SearchIcon className="size-4 text-muted-foreground" />
-            <Input value={proxySearch} onChange={(event) => { setProxySearch(event.target.value); setProxyPage(1); }} placeholder="搜索代理地址 / 来源 / 标签" />
+            <Input value={proxySearch} onChange={(event) => { setProxySearch(event.target.value); setProxyPage(1); }} placeholder="Search proxy address / source / tag" />
           </div>
           <div className="overflow-hidden rounded-3xl border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>代理</TableHead>
-                  <TableHead>来源</TableHead>
-                  <TableHead>检测</TableHead>
-                   <TableHead>操作</TableHead>
-                  <TableHead>出口</TableHead>
-                  <TableHead>连通性</TableHead>
-                  <TableHead>耗时</TableHead>
-                  <TableHead>备注</TableHead>
+                  <TableHead>Proxy</TableHead>
+                  <TableHead>Source</TableHead>
+                  <TableHead>Check</TableHead>
+                   <TableHead>Action</TableHead>
+                  <TableHead>Exit</TableHead>
+                  <TableHead>Connectivity</TableHead>
+                  <TableHead>Latency</TableHead>
+                  <TableHead>Notes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1418,9 +1417,9 @@ export function AdminProxiesClient() {
                         {result ? (
                           <Badge variant={result.ok ? "default" : "destructive"}>
                             {result.ok ? <CheckCircle2Icon data-icon="inline-start" /> : <XCircleIcon data-icon="inline-start" />}
-                            {result.ok ? "可用" : "异常"}
+                            {result.ok ? "OK" : "Error"}
                           </Badge>
-                        ) : <span className="text-muted-foreground">未检测</span>}
+                        ) : <span className="text-muted-foreground">Not checked</span>}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-2">
@@ -1430,7 +1429,7 @@ export function AdminProxiesClient() {
                             onClick={() => saveProxySelection(proxy.id)}
                             disabled={loading}
                           >
-                            {selection?.selectedProxyId === proxy.id ? "当前" : "设为当前"}
+                            {selection?.selectedProxyId === proxy.id ? "Current" : "Set current"}
                           </Button>
                           <Button
                             variant="outline"
@@ -1439,16 +1438,16 @@ export function AdminProxiesClient() {
                             disabled={loading || checking || checkingProxyId === proxy.id}
                           >
                             {checkingProxyId === proxy.id ? <Loader2Icon data-icon="inline-start" className="animate-spin" /> : <SearchIcon data-icon="inline-start" />}
-                            {checkingProxyId === proxy.id ? "检测中..." : "单独检测"}
+                            {checkingProxyId === proxy.id ? "Checking..." : "Check"}
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => mutateProxyPool("delete", { proxyId: proxy.id }, "代理已删除")}
+                            onClick={() => mutateProxyPool("delete", { proxyId: proxy.id }, "Proxy deleted")}
                             disabled={loading}
                             className="text-destructive hover:text-destructive"
                           >
-                            <Trash2Icon data-icon="inline-start" />删除
+                            <Trash2Icon data-icon="inline-start" />Delete
                           </Button>
                         </div>
                       </TableCell>
@@ -1478,7 +1477,7 @@ export function AdminProxiesClient() {
                     </TableRow>
                   );
                 })}
-                {proxies.length === 0 && <TableRow><TableCell colSpan={9} className="h-32 text-center text-muted-foreground">暂无代理配置，请在服务端环境变量中配置 {proxyPool === "premium" ? "PREMIUM_UPSTREAM_PROXY_LIST" : "UPSTREAM_PROXY_LIST"}。</TableCell></TableRow>}
+                {proxies.length === 0 && <TableRow><TableCell colSpan={9} className="h-32 text-center text-muted-foreground">No proxies configured. Set the environment variable {proxyPool === "premium" ? "PREMIUM_UPSTREAM_PROXY_LIST" : "UPSTREAM_PROXY_LIST"}。</TableCell></TableRow>}
               </TableBody>
             </Table>
           </div>
@@ -1490,10 +1489,10 @@ export function AdminProxiesClient() {
 }
 
 function withdrawalStatusText(status: PublicWorkerWithdrawalRequest["status"]) {
-  if (status === "PENDING") return "待处理";
-  if (status === "PAID") return "已付款";
-  if (status === "REJECTED") return "已拒绝";
-  return "已取消";
+  if (status === "PENDING") return "Pending";
+  if (status === "PAID") return "Paid";
+  if (status === "REJECTED") return "Rejected";
+  return "Cancelled";
 }
 
 function withdrawalStatusBadgeVariant(status: PublicWorkerWithdrawalRequest["status"]): "default" | "secondary" | "destructive" | "outline" {
@@ -1508,7 +1507,7 @@ function formatOrderQrRemaining(expiresAt: string | null | undefined, now: numbe
   const expiresAtMs = new Date(expiresAt).getTime();
   if (!Number.isFinite(expiresAtMs)) return "";
   const remainingMs = expiresAtMs - now;
-  if (remainingMs <= 0) return "已过期";
+  if (remainingMs <= 0) return "Expired";
   const totalSeconds = Math.ceil(remainingMs / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
